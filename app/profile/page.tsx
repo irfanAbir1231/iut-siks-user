@@ -1,0 +1,42 @@
+"use client";
+import { useUser, SignInButton } from "@clerk/nextjs";
+
+export default function ProfilePage() {
+  const { isSignedIn, user } = useUser();
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <h2 className="text-2xl font-bold mb-4">You are not logged in</h2>
+        <SignInButton>
+          <button className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition text-lg">
+            Login
+          </button>
+        </SignInButton>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-10">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 w-full max-w-md flex flex-col items-center">
+        {user.imageUrl && (
+          <img
+            src={user.imageUrl}
+            alt="Profile picture"
+            className="w-24 h-24 rounded-full mb-4 border-4 border-green-200 dark:border-green-800 shadow"
+          />
+        )}
+        <h2 className="text-2xl font-bold mb-2 text-green-800 dark:text-green-200">
+          {user.fullName || user.username || "User"}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-2">
+          {user.emailAddresses?.[0]?.emailAddress}
+        </p>
+        <div className="mt-6 w-full flex flex-col gap-2">
+          {/* Add more profile info or actions here if needed */}
+        </div>
+      </div>
+    </div>
+  );
+}
