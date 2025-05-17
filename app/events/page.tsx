@@ -2,27 +2,28 @@ import Link from "next/link";
 
 const events = [
   {
-    title: "Ramadan Seminar",
-    date: "2024-04-10",
-    description:
-      "Join us for a seminar on the significance of Ramadan and how to make the most of it.",
+    title: "Seerah Quiz",
+    date: "2025-05-25",
+    description: "Test your knowledge about the life of Prophet Muhammad (PBUH) in this engaging quiz.",
+    slug: "seerah-quiz", // Unique slug for dynamic routing
   },
   {
-    title: "Charity Drive",
-    date: "2024-05-01",
-    description:
-      "Participate in our annual charity drive to support local communities in need.",
+    title: "Halal Design & Calligraphy Competition",
+    date: "2025-05-25",
+    description: "Showcase your creativity in designing and calligraphy with an Islamic theme.",
+    slug: "halal-design-calligraphy", // Unique slug for dynamic routing
   },
   {
-    title: "Quran Recitation Competition",
-    date: "2024-06-15",
-    description: "Showcase your recitation skills and win exciting prizes.",
+    title: "Islamic Ideathon",
+    date: "2025-05-25",
+    description: "Brainstorm and present innovative ideas to solve challenges faced by the Muslim community.",
+    slug: "islamic-ideathon", // Unique slug for dynamic routing
   },
   {
-    title: "Eid Gathering",
-    date: "2024-07-01",
-    description:
-      "Celebrate Eid with fellow students and enjoy food, games, and more.",
+    title: "Attention Maestro",
+    date: "2025-05-25",
+    description: "Participate in a fun and interactive event to test your focus and attention skills.",
+    slug: "attention-maestro", // Unique slug for dynamic routing
   },
 ];
 
@@ -52,7 +53,7 @@ export default function EventsPage() {
               <p className="text-green-800 mb-6">{event.description}</p>
             </div>
             <Link
-              href="/events/register"
+              href={`/events/register/${event.slug}`} // Dynamic route
               className="inline-block mt-auto px-6 py-2 rounded-lg bg-green-500 text-white font-medium shadow hover:bg-green-600 transition-colors duration-150 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
             >
               Register
