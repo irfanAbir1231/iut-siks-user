@@ -108,7 +108,8 @@ export default function Navbar() {
                   setIsMenuOpen(true);
                   setMenuAnim("in");
                 } else {
-                  setMenuAnim("out");
+                  setIsMenuOpen(false);
+                  setMenuAnim(null);
                 }
               }}
               className="inline-flex items-center justify-center p-2 rounded-lg text-green-100 hover:bg-green-600 focus:outline-none"
@@ -159,7 +160,10 @@ export default function Navbar() {
                     ? "bg-green-200 text-green-900"
                     : "text-green-100 hover:bg-green-600 hover:text-white"
                 }`}
-                onClick={() => setMenuAnim("out")}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setMenuAnim(null);
+                }}
               >
                 {link.name}
               </Link>
@@ -171,14 +175,20 @@ export default function Navbar() {
                 <Link
                   href="/profile"
                   className="block px-3 py-2 rounded-lg text-base font-medium text-green-100 hover:bg-green-600"
-                  onClick={() => setMenuAnim("out")}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setMenuAnim(null);
+                  }}
                 >
                   Profile
                 </Link>
                 <SignOutButton>
                   <button
                     className="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-red-600 hover:bg-red-50"
-                    onClick={() => setMenuAnim("out")}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setMenuAnim(null);
+                    }}
                   >
                     Logout
                   </button>
