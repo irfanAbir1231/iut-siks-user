@@ -5,25 +5,29 @@ const events = [
     title: "Seerah Quiz",
     date: "2025-05-25",
     description: "Test your knowledge about the life of Prophet Muhammad (PBUH) in this engaging quiz.",
-    slug: "seerah-quiz", // Unique slug for dynamic routing
+    route: "seerah-quiz",
+    available: true,
   },
   {
     title: "Halal Design & Calligraphy Competition",
     date: "2025-05-25",
     description: "Showcase your creativity in designing and calligraphy with an Islamic theme.",
-    slug: "halal-design-calligraphy", // Unique slug for dynamic routing
+    route: "halal-design-calligraphy",
+    available: true,
   },
   {
     title: "Islamic Ideathon",
     date: "2025-05-25",
     description: "Brainstorm and present innovative ideas to solve challenges faced by the Muslim community.",
-    slug: "islamic-ideathon", // Unique slug for dynamic routing
+    route: "islamic-ideathon",
+    available: true,
   },
   {
     title: "Attention Maestro",
     date: "2025-05-25",
     description: "Participate in a fun and interactive event to test your focus and attention skills.",
-    slug: "attention-maestro", // Unique slug for dynamic routing
+    route: "attention-maestro",
+    available: false,
   },
 ];
 
@@ -52,12 +56,14 @@ export default function EventsPage() {
               </p>
               <p className="text-green-800 mb-6">{event.description}</p>
             </div>
-            <Link
-              href={`/events/register/${event.slug}`} // Dynamic route
-              className="inline-block mt-auto px-6 py-2 rounded-lg bg-green-500 text-white font-medium shadow hover:bg-green-600 transition-colors duration-150 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              Register
-            </Link>
+            {event.available && (
+              <Link
+                href={`/events/register/${event.route}`}
+                className="inline-block mt-auto px-6 py-2 rounded-lg bg-green-500 text-white font-medium shadow hover:bg-green-600 transition-colors duration-150 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
+              >
+                Register
+              </Link>
+            )}
           </div>
         ))}
       </div>
