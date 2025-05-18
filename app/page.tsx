@@ -5,9 +5,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   SignInButton,
-  SignUpButton,
-  useUser,
-  SignOutButton,
 } from "@clerk/nextjs";
 
 export default function Home() {

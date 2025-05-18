@@ -1,6 +1,6 @@
 "use client";
 import { useUser, SignInButton } from "@clerk/nextjs";
-
+import Image from "next/image";
 export default function ProfilePage() {
   const { isSignedIn, user } = useUser();
 
@@ -21,10 +21,13 @@ export default function ProfilePage() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-10">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 w-full max-w-md flex flex-col items-center">
         {user.imageUrl && (
-          <img
+          <Image
             src={user.imageUrl}
             alt="Profile picture"
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full mb-4 border-4 border-green-200 dark:border-green-800 shadow"
+            unoptimized
           />
         )}
         <h2 className="text-2xl font-bold mb-2 text-green-800 dark:text-green-200">
