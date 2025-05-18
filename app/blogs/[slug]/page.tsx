@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 // Dummy blog data (in real app, fetch by slug)
 const blogs = [
@@ -42,11 +43,12 @@ export default function BlogDetailsPage() {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(hardcodedComments);
   const [likes, setLikes] = useState(0);
+  const { isSignedIn, user } = useUser();
 
   function handlePostComment(e: React.FormEvent) {
     e.preventDefault();
     if (comment.trim()) {
-      setComments([{ name: "You", message: comment }, ...comments]);
+      setComments([{ name: user?.username || user?.firstName || "You", message: comment }, ...comments]);
       setComment("");
     }
   }
@@ -79,20 +81,30 @@ export default function BlogDetailsPage() {
       </article>
       <section className="bg-white rounded-2xl shadow border border-gray-200 max-w-2xl w-full p-8 mb-10">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Comments</h2>
-        <form onSubmit={handlePostComment} className="mb-6 flex flex-col gap-4">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none resize-none min-h-[80px]"
-          />
-          <button
-            type="submit"
-            className="self-end px-6 py-2 rounded-lg bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition-colors duration-150"
-          >
-            Post Comment
-          </button>
-        </form>
+        {isSignedIn ? (
+          <form onSubmit={handlePostComment} className="mb-6 flex flex-col gap-4">
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write a comment..."
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none resize-none min-h-[80px]"
+            />
+            <button
+              type="submit"
+              className="self-end px-6 py-2 rounded-lg bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition-colors duration-150"
+            >
+              Post Comment
+            </button>
+          </form>
+        ) : (
+          <div className="mb-6 text-center text-blue-700 font-semibold">
+            <SignInButton>
+              <button className="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">
+                Please log in to post a comment
+              </button>
+            </SignInButton>
+          </div>
+        )}
         <ul className="flex flex-col gap-4">
           {comments.map((c, idx) => (
             <li

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   SignInButton,
   SignUpButton,
@@ -53,7 +54,14 @@ export default function Navbar() {
               href="/"
               className="flex items-center gap-2 text-xl font-bold text-green-100 hover:text-green-300 transition-colors"
             >
-              <span className="text-2xl">🕌</span>
+              {/* <span className="text-2xl">🕌</span> */}
+              <Image
+                src="/iut-siks-logo.jpg"
+                alt="IUT-SIKS Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full"
+              />
               <span>IUT-SIKS</span>
             </Link>
           </div>
@@ -94,7 +102,7 @@ export default function Navbar() {
                       >
                         Profile
                       </Link>
-                      <SignOutButton>
+                      <SignOutButton redirectUrl={pathname}>
                         <button
                           className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
                           onClick={() => setProfileDropdownOpen(false)}
@@ -204,7 +212,7 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
-                <SignOutButton>
+                <SignOutButton redirectUrl={pathname}>
                   <button
                     className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium text-red-400 hover:bg-red-900/30 hover:text-red-200"
                     onClick={() => {

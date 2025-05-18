@@ -3,6 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import {
+  SignInButton,
+  SignUpButton,
+  useUser,
+  SignOutButton,
+} from "@clerk/nextjs";
 
 export default function Home() {
   const [offset, setOffset] = useState(0);
@@ -68,12 +74,13 @@ export default function Home() {
             Technology
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center w-full gap-3 sm:gap-4 mt-6 sm:mt-8 animate-fade-in px-2 xs:px-0">
-            <Link
-              href="/auth/register"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition backdrop-blur-md bg-opacity-90 animate-fade-in text-center text-base xs:text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              Join Us
-            </Link>
+            <SignInButton>
+              <button
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition backdrop-blur-md bg-opacity-90 animate-fade-in text-center text-base xs:text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              >
+                Join Us
+              </button>
+            </SignInButton>
             <Link
               href="/events"
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/90 dark:bg-gray-800/90 text-green-700 dark:text-green-300 font-semibold shadow hover:bg-green-100 dark:hover:bg-green-900 transition backdrop-blur-md animate-fade-in text-center text-base xs:text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
