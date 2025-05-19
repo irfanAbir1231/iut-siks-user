@@ -1,180 +1,493 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import {
-  SignInButton,
-} from "@clerk/nextjs";
+import { SignInButton } from "@clerk/nextjs";
+
+// Add a simple count-up hook for stats
+function useCountUp(target: number, duration = 1200) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const step = Math.ceil(target / (duration / 16));
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(interval);
+      } else {
+        setCount(start);
+      }
+    }, 16);
+    return () => clearInterval(interval);
+  }, [target, duration]);
+  return count;
+}
 
 export default function Home() {
-  const [offset, setOffset] = useState(0);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const navCardsRef = useRef<HTMLDivElement>(null);
+  const featuresStatsRef = useRef<HTMLDivElement>(null);
+
+  // Parallax state for nav cards
+  const [parallax, setParallax] = useState<{
+    [key: number]: { x: number; y: number };
+  }>({});
+  const handleParallax = (e: React.MouseEvent, idx: number) => {
+    const card = e.currentTarget as HTMLDivElement;
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    setParallax((prev) => ({ ...prev, [idx]: { x, y } }));
+  };
+  const resetParallax = (idx: number) => {
+    setParallax((prev) => ({ ...prev, [idx]: { x: 0, y: 0 } }));
+  };
+
+  // Stats data and animated counts
+  const stats = [
+    { number: 500, label: "Members", suffix: "+" },
+    { number: 50, label: "Events", suffix: "+" },
+    { number: 100, label: "Articles", suffix: "+" },
+    { number: 5, label: "Years", suffix: "+" },
+  ];
+  const count0 = useCountUp(stats[0].number, 1200);
+  const count1 = useCountUp(stats[1].number, 1400);
+  const count2 = useCountUp(stats[2].number, 1600);
+  const count3 = useCountUp(stats[3].number, 1800);
+  const counts = [count0, count1, count2, count3];
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 640);
+    // Trigger initial animation
+    setTimeout(() => setIsVisible(true), 100);
+
+    // Set up intersection observer for scroll animations
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "50px" }
+    );
+
+    // Observe cards
+    if (cardsRef.current) {
+      const cards = cardsRef.current.querySelectorAll(".card-item");
+      cards.forEach((card) => observer.observe(card));
+    }
+
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!heroRef.current) return;
-      const rect = heroRef.current.getBoundingClientRect();
-      // Only parallax while hero is in view
-      if (rect.bottom > 0 && rect.top < window.innerHeight) {
-        setOffset(window.scrollY * 0.3); // adjust parallax strength here
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const navigationCards = [
+    {
+      title: "Events",
+      href: "/events",
+      icon: "📅",
+      description: "Discover upcoming events and community gatherings",
+      color: "emerald",
+      gradient: "from-emerald-500 to-teal-600",
+      delay: "0ms",
+    },
+    {
+      title: "Blog",
+      href: "/blogs",
+      icon: "📝",
+      description: "Read insights, reflections, and knowledge articles",
+      color: "blue",
+      gradient: "from-blue-500 to-indigo-600",
+      delay: "100ms",
+    },
+    {
+      title: "Prayer Times",
+      href: "/prayer-times",
+      icon: "🕌",
+      description: "Stay updated with accurate daily prayer times",
+      color: "amber",
+      gradient: "from-amber-500 to-orange-600",
+      delay: "200ms",
+    },
+    {
+      title: "Daily Reminders",
+      href: "/reminders",
+      icon: "💫",
+      description: "Get inspired with daily spiritual reminders",
+      color: "purple",
+      gradient: "from-purple-500 to-violet-600",
+      delay: "300ms",
+    },
+  ];
 
-  const heroImageStyle = isMobile
-    ? {
-        transform: `translateY(${offset * 0.7}px) scale(${
-          1.08 + offset * 0.0007
-        })`,
-        opacity: `${1 - Math.min(offset / 400, 0.3)}`,
-      }
-    : { transform: `translateY(${offset}px) scale(1.08)` };
-  const heroTextOpacity = isMobile ? 1 - Math.min(offset / 200, 0.3) : 1;
+  const features = [
+    {
+      icon: "🎯",
+      title: "Purpose-Driven",
+      description: "Guided by Islamic values and principles",
+    },
+    {
+      icon: "🤝",
+      title: "Community",
+      description: "",
+    },
+    {
+      icon: "📚",
+      title: "Knowledge",
+      description: "Continuous learning and spiritual growth",
+    },
+    {
+      icon: "🌟",
+      title: "Excellence",
+      description: "Striving for the highest standards",
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-blue-50 to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
       {/* Hero Section */}
-      <section
-        ref={heroRef}
-        className="relative w-full flex flex-col items-center justify-center text-center py-20 xs:py-24 sm:py-28 md:py-32 px-4 xs:px-6 sm:px-0 bg-gradient-to-br from-green-200/60 via-blue-200/40 to-transparent dark:from-green-900/40 dark:via-blue-900/30 dark:to-transparent overflow-hidden"
-        style={{ minHeight: 400 }}
-      >
-        <div className="absolute inset-0 w-full h-full">
-          <Image
-            src="/hero-bg.jpg"
-            alt="IUT-SIKS"
-            fill
-            className="object-cover opacity-20 pointer-events-none select-none"
-            style={heroImageStyle}
-            priority
+      <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-300/20 dark:bg-emerald-800/20 rounded-full blur-3xl animate-float" />
+          <div
+            className="absolute bottom-40 right-10 w-96 h-96 bg-blue-300/20 dark:bg-blue-900/20 rounded-full blur-3xl animate-float"
+            style={{ animationDelay: "2s" }}
           />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-emerald-100/30 to-blue-100/30 dark:from-emerald-900/20 dark:to-blue-900/20 rounded-full blur-3xl" />
         </div>
-        <div className="absolute inset-0 w-full h-full bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm z-10" />
-        <div
-          className="relative z-20 flex flex-col items-center animate-fade-in-up w-full transition-opacity duration-300"
-          style={{ opacity: heroTextOpacity }}
-        >
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-extrabold text-green-800 dark:text-white drop-shadow mb-3 md:mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-500 via-blue-500 to-green-400 animate-gradient-move break-words leading-tight xs:leading-tight sm:leading-tight">
-            Welcome to{" "}
-            <span className="text-green-600 dark:text-green-400">IUT-SIKS</span>
-          </h1>
-          <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-green-700 dark:text-gray-200 max-w-xs xs:max-w-md sm:max-w-2xl mx-auto mb-6 animate-fade-in px-2 xs:px-0">
-            Society of Islamic Knowledge Seekers at Islamic University of
-            Technology
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center w-full gap-3 sm:gap-4 mt-6 sm:mt-8 animate-fade-in px-2 xs:px-0">
-            <SignInButton>
-              <button
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition backdrop-blur-md bg-opacity-90 animate-fade-in text-center text-base xs:text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              >
-                Join Us
-              </button>
-            </SignInButton>
-            <Link
-              href="/events"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/90 dark:bg-gray-800/90 text-green-700 dark:text-green-300 font-semibold shadow hover:bg-green-100 dark:hover:bg-green-900 transition backdrop-blur-md animate-fade-in text-center text-base xs:text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+
+        <div className="flex-1 flex flex-col items-center justify-center pt-10 sm:pt-16">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div
+              className={`transition-all duration-1000 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
             >
-              Upcoming Events
-            </Link>
+              {/* Main Heading */}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10">
+                <span className="block text-gradient font-poppins">
+                  IUT SIKS
+                </span>
+                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-600 mt-2"></span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                Fostering spiritual growth and academic excellence at{" "}
+                <span className="font-semibold text-emerald-700">
+                  Islamic University of Technology
+                </span>
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+                <SignInButton>
+                  <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                    <span>Join Our Community</span>
+                    <svg
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </SignInButton>
+                <Link
+                  href="/events"
+                  className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  Explore Events
+                </Link>
+              </div>
+              <div style={{ height: "80px" }} />
+              <button
+                aria-label="Scroll to next section"
+                onClick={() =>
+                  navCardsRef.current?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="flex justify-center animate-bounce focus:outline-none mx-auto"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <div className="w-8 h-14 border-2 border-emerald-400 rounded-full flex justify-center items-start">
+                  <div className="w-1 h-4 bg-emerald-400 rounded-full mt-2" />
+                </div>
+              </button>
+            </div>
           </div>
-        </div>
-        {/* Mobile scroll indicator at very bottom of hero section */}
-        <div className="sm:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
-          <div className="w-8 h-1 rounded-full bg-green-400/60 mb-1 animate-pulse" />
-          <div className="w-4 h-1 rounded-full bg-green-400/30 animate-pulse" />
         </div>
       </section>
 
-      {/* Navigation Grid */}
-      <main className="flex-1 flex flex-col items-center justify-center py-10 xs:py-14 sm:py-16 px-0 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 xs:gap-6 sm:gap-8 w-full max-w-md xs:max-w-2xl sm:max-w-5xl px-2 xs:px-4">
-          <Link
-            href="/events"
-            className="group relative p-5 xs:p-6 sm:p-8 rounded-2xl bg-white/60 dark:bg-gray-800/40 shadow-xl border border-green-100 dark:border-green-900 transition-all overflow-hidden backdrop-blur-lg animate-fade-in-up w-full min-h-[120px] xs:min-h-[140px]"
-            style={{ willChange: "transform" }}
-            onMouseMove={(e) => {
-              const card = e.currentTarget;
-              const rect = card.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              const moveX = (x - rect.width / 2) / 18;
-              const moveY = (y - rect.height / 2) / 18;
-              card.style.transform = `scale(1.03) translateY(${moveY}px) translateX(${moveX}px)`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "";
-            }}
+      {/* Navigation Cards Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8" ref={navCardsRef}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
+              Explore Our Platform
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+          </div>
+
+          <div
+            ref={cardsRef}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
           >
-            <div className="flex flex-col items-center">
-              <span className="text-4xl sm:text-5xl mb-3 sm:mb-4">📅</span>
-              <span className="text-lg sm:text-2xl font-bold text-green-800 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition text-center">
-                View Events
-              </span>
-              <span className="mt-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center">
-                See all upcoming and past events
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-green-100/30 to-blue-100/10 dark:from-green-900/20 dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition" />
-          </Link>
-          <Link
-            href="/blogs"
-            className="group relative p-5 xs:p-6 sm:p-8 rounded-2xl bg-white/60 dark:bg-gray-800/40 shadow-xl border border-blue-100 dark:border-blue-900 hover:scale-[1.03] hover:shadow-2xl transition-all overflow-hidden backdrop-blur-lg animate-fade-in-up w-full min-h-[120px] xs:min-h-[140px]"
+            {navigationCards.map((card, index) => (
+              <Link
+                key={card.title}
+                href={card.href}
+                className={`card-item scroll-reveal group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-lg hover:shadow-2xl transition-all duration-500 card-hover-effect`}
+                style={{
+                  animationDelay: card.delay,
+                  transform: parallax[index]
+                    ? `rotateY(${parallax[index].x}deg) rotateX(${-parallax[
+                        index
+                      ].y}deg) scale(1.03)`
+                    : undefined,
+                  willChange: "transform",
+                }}
+                onMouseMove={(e) => handleParallax(e, index)}
+                onMouseLeave={() => resetParallax(index)}
+              >
+                <div
+                  className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-50 transition-opacity duration-500"
+                  style={{
+                    background: `linear-gradient(135deg, ${card.gradient})`,
+                  }}
+                />
+                <div className="relative p-10">
+                  <div className="flex items-start space-x-6">
+                    <div
+                      className={`flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-r ${card.gradient} flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      {card.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-3 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                        {card.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+                        {card.description}
+                      </p>
+                      <div className="flex items-center text-emerald-600 dark:text-emerald-400 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
+                        <span>Learn More</span>
+                        <svg
+                          className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Hover gradient overlay */}
+                <div
+                  className={`absolute inset-0 opacity-0 group-hover:opacity-50 transition-opacity duration-500 bg-gradient-to-r ${card.gradient}`}
+                />
+              </Link>
+            ))}
+          </div>
+          <button
+            aria-label="Scroll to features and stats"
+            onClick={() =>
+              featuresStatsRef.current?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="flex justify-center animate-bounce focus:outline-none mx-auto mt-12 mb-0"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            <div className="flex flex-col items-center">
-              <span className="text-4xl sm:text-5xl mb-3 sm:mb-4">📝</span>
-              <span className="text-lg sm:text-2xl font-bold text-green-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition text-center">
-                Read Blogs
-              </span>
-              <span className="mt-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center">
-                Insights, reflections, and articles
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-100/30 to-green-100/10 dark:from-blue-900/20 dark:to-green-900/10 opacity-0 group-hover:opacity-100 transition" />
-          </Link>
-          <Link
-            href="/prayer-times"
-            className="group relative p-5 xs:p-6 sm:p-8 rounded-2xl bg-white/60 dark:bg-gray-800/40 shadow-xl border border-yellow-100 dark:border-yellow-900 hover:scale-[1.03] hover:shadow-2xl transition-all overflow-hidden backdrop-blur-lg animate-fade-in-up w-full min-h-[120px] xs:min-h-[140px]"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-4xl sm:text-5xl mb-3 sm:mb-4">🕌</span>
-              <span className="text-lg sm:text-2xl font-bold text-green-800 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition text-center">
-                Prayer Times
-              </span>
-              <span className="mt-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center">
-                Stay updated with daily prayer times
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100/30 to-green-100/10 dark:from-yellow-900/20 dark:to-green-900/10 opacity-0 group-hover:opacity-100 transition" />
-          </Link>
-          <Link
-            href="/reminders"
-            className="group relative p-5 xs:p-6 sm:p-8 rounded-2xl bg-white/60 dark:bg-gray-800/40 shadow-xl border border-purple-100 dark:border-purple-900 hover:scale-[1.03] hover:shadow-2xl transition-all overflow-hidden backdrop-blur-lg animate-fade-in-up w-full min-h-[120px] xs:min-h-[140px]"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-4xl sm:text-5xl mb-3 sm:mb-4">🕋</span>
-              <span className="text-lg sm:text-2xl font-bold text-green-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition text-center">
-                Daily Reminders
-              </span>
-              <span className="mt-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center">
-                Get your daily dose of inspiration
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-purple-100/30 to-blue-100/10 dark:from-purple-900/20 dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition" />
-          </Link>
+            <svg
+              className="w-10 h-10 text-emerald-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
         </div>
-      </main>
+      </section>
+
+      {/* Move the stats and features grid into a new section below, with ref */}
+      <section ref={featuresStatsRef} className="py-20 px-4 sm:px-6 lg:px-8">
+        {/* Stats Section */}
+        <div className="py-10 bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-900 dark:to-emerald-800 rounded-3xl mb-16">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-white mb-4">
+                Growing Together
+              </h2>
+              <p className="text-emerald-100 text-lg">
+                Building a stronger community every day
+              </p>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
+              {stats.map((stat, index) => (
+                <div key={stat.label} className="text-center group">
+                  <div className="text-4xl sm:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                    {counts[index]}
+                    {stat.suffix}
+                  </div>
+                  <div className="text-emerald-100 font-medium">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-24 px-2">
+          {features.map((feature, index) => (
+            <div
+              key={feature.title}
+              className={`p-10 rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/40 dark:border-gray-800/40 text-center shadow-lg transition-all duration-700 hover:bg-white/90 dark:hover:bg-gray-800/90 hover:scale-105`}
+              style={{ transitionDelay: `${(index + 4) * 100}ms` }}
+            >
+              <div
+                className="text-4xl mb-4 animate-float"
+                style={{ animationDelay: `${index * 0.5}s` }}
+              >
+                {feature.icon}
+              </div>
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-base text-gray-600 dark:text-gray-300">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-3xl p-12 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200 rounded-full opacity-20 transform translate-x-16 -translate-y-16" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-200 rounded-full opacity-20 transform -translate-x-16 translate-y-16" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">
+                Ready to Begin Your Journey?
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto"></p>
+              <SignInButton>
+                <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse-glow">
+                  Get Started Today
+                </button>
+              </SignInButton>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="w-full py-6 xs:py-8 text-center text-gray-500 dark:text-gray-400 text-xs xs:text-sm bg-white/80 dark:bg-gray-900/80 backdrop-blur">
-        &copy; {new Date().getFullYear()} IUT-SIKS. All rights reserved.
+      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                  <img
+                    src="/iut-siks-logo.jpg"
+                    alt="IUT SIKS Logo"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">IUT SIKS</h3>
+                  <p className="text-gray-400 text-sm"></p>
+                </div>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Empowering minds, nurturing souls, and building a community
+                rooted in Islamic values and academic excellence.
+              </p>
+              <div className="flex space-x-4">
+                {/* Social Media Icons */}
+                <a
+                  href="#"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                >
+                  <span className="text-sm">📘</span>
+                </a>
+                <a
+                  href="#"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                >
+                  <span className="text-sm">📧</span>
+                </a>
+                <a
+                  href="#"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                >
+                  <span className="text-sm">📱</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                {navigationCards.map((link) => (
+                  <li key={link.title}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-400 hover:text-emerald-400 transition-colors"
+                    >
+                      {link.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contact</h4>
+              <div className="space-y-2 text-gray-400">
+                <p>Islamic University of Technology</p>
+                <p>Board Bazar, Gazipur-1704</p>
+                <p>Dhaka, Bangladesh</p>
+                <p className="text-emerald-400">info@iut-siks.org</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+            <p>
+              &copy; {new Date().getFullYear()} IUT-SIKS. All rights reserved.
+              Built with ❤️ for our community.
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );

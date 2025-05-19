@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 const blogs = [
   {
@@ -36,23 +38,78 @@ const blogs = [
 ];
 
 export default function BlogHomePage() {
+  const [parallax, setParallax] = useState<{
+    [key: number]: { x: number; y: number };
+  }>({});
+  const [revealed, setRevealed] = useState<{ [key: number]: boolean }>({});
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.idx);
+            setRevealed((prev) => ({ ...prev, [idx]: true }));
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    cardsRef.current.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const handleParallax = (e: React.MouseEvent, idx: number) => {
+    const card = e.currentTarget as HTMLDivElement;
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    setParallax((prev) => ({ ...prev, [idx]: { x, y } }));
+  };
+  const resetParallax = (idx: number) => {
+    setParallax((prev) => ({ ...prev, [idx]: { x: 0, y: 0 } }));
+  };
+
   return (
-    <main className="min-h-screen bg-green-50 px-4 py-12 flex flex-col items-center">
-      <h1 className="text-3xl md:text-4xl font-bold text-green-800 mb-10 text-center">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950 px-4 py-20 flex flex-col items-center">
+      <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center font-poppins">
         Latest Blogs from IUT-SIKS
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-5xl">
-        {blogs.map((blog) => (
+      <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mb-14" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-6xl">
+        {blogs.map((blog, idx) => (
           <div
             key={blog.slug}
-            className="bg-white border border-green-300 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-150 p-6 flex flex-col justify-between"
+            ref={(el) => {
+              cardsRef.current[idx] = el;
+            }}
+            data-idx={idx}
+            className={`relative group rounded-2xl bg-white/70 dark:bg-gray-900/70 border border-white/40 dark:border-gray-800/40 shadow-lg backdrop-blur-md p-8 flex flex-col justify-between transition-all duration-700 hover:scale-105 hover:shadow-2xl cursor-pointer ${
+              revealed[idx]
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-10"
+            }`}
+            style={
+              parallax[idx]
+                ? {
+                    transform: `rotateY(${
+                      parallax[idx].x
+                    }deg) rotateX(${-parallax[idx].y}deg) scale(1.03)`,
+                  }
+                : undefined
+            }
+            onMouseMove={(e) => handleParallax(e, idx)}
+            onMouseLeave={() => resetParallax(idx)}
           >
             <div>
-              <h2 className="text-2xl font-semibold text-green-700 mb-2">
+              <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
                 {blog.title}
               </h2>
-              <p className="text-green-800 mb-4 line-clamp-3">{blog.excerpt}</p>
-              <div className="flex items-center text-sm text-green-600 mb-6 gap-2">
+              <p className="text-gray-700 dark:text-gray-200 mb-4 line-clamp-3">
+                {blog.excerpt}
+              </p>
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-8 gap-2">
                 <span>{blog.author}</span>
                 <span>•</span>
                 <span>
@@ -66,10 +123,12 @@ export default function BlogHomePage() {
             </div>
             <Link
               href={`/blogs/${blog.slug}`}
-              className="inline-block mt-auto px-6 py-2 rounded-lg bg-green-500 text-white font-medium shadow hover:bg-green-600 transition-colors duration-150 text-center focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
             >
               Read More
             </Link>
+            {/* Glass overlay on hover */}
+            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-300 bg-gradient-to-br from-emerald-200/40 to-blue-200/40 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-2xl" />
           </div>
         ))}
       </div>
