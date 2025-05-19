@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+// again updated
 const events = [
   {
     title: "Seerah Quiz",
