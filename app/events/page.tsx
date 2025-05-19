@@ -19,7 +19,7 @@ const events = [
     title: "Islamic Ideathon",
     date: "2025-05-25",
     description: "Brainstorm and present innovative ideas to solve challenges faced by the Muslim community.",
-    route: "islamic-ideathon",
+    route: "case-competition",
     available: true,
   },
   {
