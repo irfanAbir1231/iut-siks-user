@@ -6,6 +6,7 @@ export default function SubmitBlogPage() {
     title: "",
     author: "",
     content: "",
+    commentsCount: 0,
   });
 
   function handleChange(

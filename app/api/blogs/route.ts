@@ -10,8 +10,19 @@ async function connectToDatabase() {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   await connectToDatabase();
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get('slug');
+
+  if (slug) {
+    const blog = await Blog.findOne({ slug });
+    if (!blog) {
+      return NextResponse.json({ message: 'Blog not found' }, { status: 404 });
+    }
+    return NextResponse.json(blog);
+  }
+
   const blogs = await Blog.find({});
   return NextResponse.json(blogs);
 }
@@ -42,4 +53,18 @@ export async function DELETE(request: Request) {
   const { id } = await request.json();
   const result = await Blog.findByIdAndDelete(id);
   return NextResponse.json({ message: 'Blog deleted', deletedBlog: result });
+}
+
+export async function PATCH(request: Request) {
+  await connectToDatabase();
+  const { blogId } = await request.json();
+
+  try {
+    const blog = await Blog.findByIdAndUpdate(blogId, { $inc: { commentsCount: 1 } }, { new: true });
+    return NextResponse.json(blog);
+  } catch (error) {
+    console.error('Error updating blog comments count:', error);
+    const errorMessage = (error as Error).message;
+    return NextResponse.json({ message: 'Failed to update comments count', error: errorMessage }, { status: 500 });
+  }
 }

@@ -1,34 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useUser, SignInButton } from "@clerk/nextjs";
 
-// Dummy blog data (in real app, fetch by slug)
-const blogs = [
-  {
-    title: "The Importance of Seeking Knowledge",
-    author: "Abdullah Rahman",
-    date: "2024-04-05",
-    slug: "importance-of-seeking-knowledge",
-    content: [
-      "Seeking knowledge is an obligation for every Muslim. In this post, we explore why learning is so highly valued in Islam and how it benefits both individuals and society as a whole.",
-      'Knowledge is the foundation of progress and enlightenment. The Prophet Muhammad (peace be upon him) said: "Seeking knowledge is an obligation upon every Muslim." (Ibn Majah)',
-      "Let us strive to learn and implement beneficial knowledge in our daily lives.",
-    ],
-  },
-  {
-    title: "Balancing Faith and Studies",
-    author: "Fatima Noor",
-    date: "2024-03-28",
-    slug: "balancing-faith-and-studies",
-    content: [
-      "University life can be challenging, but maintaining your faith is possible. Here are practical tips for balancing your academic responsibilities with your spiritual growth.",
-      "Set aside time for daily prayers, join study circles, and remember Allah in all your actions.",
-      "Balance is key to success in both this world and the next.",
-    ],
-  },
-  // ...add more if needed
-];
+interface Blog {
+  _id: string;
+  title: string;
+  author: string;
+  date: string;
+  slug: string;
+  content: string[];
+}
 
 const hardcodedComments = [
   { name: "Ali", message: "JazakAllah khair for this insightful post!" },
@@ -38,19 +20,58 @@ const hardcodedComments = [
 export default function BlogDetailsPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const blog = blogs.find((b) => b.slug === slug) || blogs[0];
 
+  const [blog, setBlog] = useState<Blog | null>(null);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(hardcodedComments);
   const [likes, setLikes] = useState(0);
   const { isSignedIn, user } = useUser();
 
-  function handlePostComment(e: React.FormEvent) {
+  useEffect(() => {
+    async function fetchBlog() {
+      const response = await fetch(`/api/blogs?slug=${slug}`);
+      const data = await response.json();
+      setBlog(data);
+    }
+
+    fetchBlog();
+  }, [slug]);
+
+  useEffect(() => {
+    async function fetchComments() {
+      const response = await fetch(`/api/comments?blogId=${blog?._id}`);
+      const data = await response.json();
+      setComments(data);
+    }
+
+    if (blog) {
+      fetchComments();
+    }
+  }, [blog]);
+
+  async function handlePostComment(e: React.FormEvent) {
     e.preventDefault();
     if (comment.trim()) {
-      setComments([{ name: user?.username || user?.firstName || "You", message: comment }, ...comments]);
-      setComment("");
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: user?.username || user?.firstName || 'Anonymous',
+          message: comment,
+          blogId: blog?._id,
+        }),
+      });
+
+      if (response.ok) {
+        const newComment = await response.json();
+        setComments((prev) => [newComment, ...prev]);
+        setComment('');
+      }
     }
+  }
+
+  if (!blog) {
+    return <p>Loading...</p>;
   }
 
   return (

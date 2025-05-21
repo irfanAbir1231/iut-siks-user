@@ -10,6 +10,7 @@ const blogs = [
     author: "Abdullah Rahman",
     date: "2024-04-05",
     slug: "importance-of-seeking-knowledge",
+    commentsCount: 5,
   },
   {
     title: "Balancing Faith and Studies",
@@ -18,6 +19,7 @@ const blogs = [
     author: "Fatima Noor",
     date: "2024-03-28",
     slug: "balancing-faith-and-studies",
+    commentsCount: 3,
   },
   {
     title: "Ramadan on Campus: A Student's Guide",
@@ -26,6 +28,7 @@ const blogs = [
     author: "Yusuf Karim",
     date: "2024-03-15",
     slug: "ramadan-on-campus",
+    commentsCount: 8,
   },
   {
     title: "The Power of Daily Dhikr",
@@ -34,6 +37,7 @@ const blogs = [
     author: "Aisha Siddiqua",
     date: "2024-02-28",
     slug: "power-of-daily-dhikr",
+    commentsCount: 2,
   },
 ];
 
@@ -127,6 +131,7 @@ export default function BlogHomePage() {
             >
               Read More
             </Link>
+            <p className="text-sm text-gray-500 mt-2">Comments: {blog.commentsCount || 0}</p>
             {/* Glass overlay on hover */}
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-300 bg-gradient-to-br from-emerald-200/40 to-blue-200/40 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-2xl" />
           </div>

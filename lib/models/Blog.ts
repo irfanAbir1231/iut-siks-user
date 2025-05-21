@@ -6,6 +6,7 @@ interface BlogDocument extends Document {
   date: Date;
   slug: string;
   content: string[];
+  commentsCount: number;
 }
 
 const BlogSchema = new mongoose.Schema<BlogDocument>({
@@ -29,6 +30,10 @@ const BlogSchema = new mongoose.Schema<BlogDocument>({
   content: {
     type: [String],
     required: true,
+  },
+  commentsCount: {
+    type: Number,
+    default: 0,
   },
 });
 
