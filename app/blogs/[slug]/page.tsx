@@ -52,20 +52,27 @@ export default function BlogDetailsPage() {
   async function handlePostComment(e: React.FormEvent) {
     e.preventDefault();
     if (comment.trim()) {
+      const newComment = {
+        name: user?.username || user?.firstName || 'Anonymous',
+        message: comment,
+        blogId: blog?._id,
+        date: new Date().toISOString(),
+      };
+
+      // Optimistically update the UI
+      setComments((prev) => [newComment, ...prev]);
+      setComment('');
+
       const response = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: user?.username || user?.firstName || 'Anonymous',
-          message: comment,
-          blogId: blog?._id,
-        }),
+        body: JSON.stringify(newComment),
       });
 
-      if (response.ok) {
-        const newComment = await response.json();
-        setComments((prev) => [newComment, ...prev]);
-        setComment('');
+      if (!response.ok) {
+        // Revert the optimistic update if the request fails
+        setComments((prev) => prev.filter((c) => c !== newComment));
+        console.error('Failed to post comment');
       }
     }
   }
