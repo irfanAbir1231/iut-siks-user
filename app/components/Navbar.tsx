@@ -9,6 +9,7 @@ import {
   useUser,
   SignOutButton,
 } from "@clerk/nextjs";
+import Image from 'next/image';
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser();
@@ -98,9 +99,11 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <img
+                <Image
                   src="/iut-siks-logo.jpg"
                   alt="IUT SIKS Logo"
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full object-cover shadow-lg"
                 />
               </div>
@@ -347,9 +350,11 @@ export default function Navbar() {
             {/* Brand */}
             <div className="flex items-center gap-3 px-6 pt-6 pb-4">
               <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg">
-                <img
+                <Image
                   src="/iut-siks-logo.jpg"
                   alt="IUT SIKS Logo"
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               </div>
