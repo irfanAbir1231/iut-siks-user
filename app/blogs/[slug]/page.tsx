@@ -134,7 +134,7 @@ export default function BlogDetailsPage() {
           </div>
         )}
         <ul className="flex flex-col gap-4">
-          {comments.map((c, idx) => (
+          {(comments || []).map((c, idx) => (
             <li
               key={idx}
               className="border-l-4 border-blue-200 pl-4 py-2 bg-blue-50 rounded"
