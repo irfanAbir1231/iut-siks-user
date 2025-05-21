@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SignInButton } from "@clerk/nextjs";
-import Image from 'next/image';
 
 // Add a simple count-up hook for stats
 function useCountUp(target: number, duration = 1200) {
@@ -415,12 +414,10 @@ export default function Home() {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
-                  <Image
-                    src="/path/to/image.jpg"
-                    alt="Description of image"
-                    width={500}
-                    height={300}
-                    className="custom-class"
+                  <img
+                    src="/iut-siks-logo.jpg"
+                    alt="IUT SIKS Logo"
+                    className="w-12 h-12 rounded-full object-cover"
                   />
                 </div>
                 <div>
