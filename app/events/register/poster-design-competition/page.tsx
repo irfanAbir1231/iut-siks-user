@@ -16,26 +16,51 @@ export default function PosterDesignRegistration() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Instructions Section */}
-          <section className="bg-[#162235] shadow-xl rounded-3xl p-8 border border-[#2bff88]/20">
-            <p className="font-serif text-lg text-[#e6fff1] mb-4 text-center">
-              Welcome to the official registration for the Poster Designing Competition of Annual Seerah Fest 1446, organized by the IUT Society of Islamic Knowledge Seekers (SIKS).
+          {/* Intro Section */}
+          <section className="bg-white/90 dark:bg-gray-800/90 shadow-xl rounded-3xl p-8 border border-green-100 dark:border-gray-700">
+            <p className="font-sans text-lg text-gray-800 dark:text-gray-100 mb-4 text-center">
+              Welcome to the official registration for the{" "}
+              <span className="font-bold font-serif text-green-800 dark:text-green-200">
+                Case Competition
+              </span>{" "}
+              at{" "}
+              <span className="font-bold text-green-900 dark:text-green-100">
+                IUT Seerah Fest 1446
+              </span>
+              , organized by the{" "}
+              <span className="font-semibold text-green-700 dark:text-green-300">
+                IUT Society of Islamic Knowledge Seekers (SIKS)
+              </span>
+              .
             </p>
-            <ul className="font-mono text-lg text-[#b6e7c9] list-disc list-inside space-y-2">
+            <p className="font-serif text-base text-gray-700 dark:text-gray-200 mb-4 text-center italic">
+              Explore real-world issues through the lens of Islam—address a
+              social issue or design a Shariah-compliant business model.
+            </p>
+          </section>
+          {/* Rules Section */}
+          <section className="bg-[#162235] shadow-xl rounded-3xl p-4 border border-[#2bff88]/20 inline-block w-fit">
+            <h2 className="font-serif text-2xl md:text-3xl text-[#6fff8b] mb-2 text-center">
+              Competition Rules
+            </h2>
+            <ul className="font-mono text-lg text-[#ffffff] list-disc list-inside space-y-1">
               <li>Eligibility: Students of IUT-OIC</li>
               <li>Registration Fee: Free</li>
               <li>Poster Size: 12 x 18 inches</li>
               <li>Do not include human or animal faces</li>
               <li>AI-generated designs will be disqualified</li>
             </ul>
-            <p className="font-serif text-lg text-[#b6e7c9] mt-4 text-center">
-              Submission Deadline: <strong className="text-[#6fff8b]">26 May 2025</strong>
+            <p className="font-serif text-lg text-[#b6e7c9] mt-2 text-center">
+              Submission Deadline: <strong className="text-[#ff811a]">26 May 2025</strong>
+            </p>
+            <p className="font-mono text-lg text-white mt-2 text-center">
+              For more details, visit our <a href="https://example.com/rules" className="underline">official rules page</a>.
             </p>
           </section>
 
           {/* Registration Section */}
           <section className="bg-[#162235] shadow-xl rounded-3xl p-8 border border-[#2bff88]/20">
-            <h2 className="font-serif text-2xl md:text-3xl text-[#6fff8b] mb-4 text-center">
+            <h2 className="font-serif text-2xl md:text-3xl text-[#ff811a] mb-4 text-center">
               Register Now
             </h2>
             <p className="font-mono text-lg text-[#b6e7c9] mb-4 text-center">
@@ -46,7 +71,7 @@ export default function PosterDesignRegistration() {
                 href="https://docs.google.com/forms/d/e/1FAIpQLSfjdIvTYsrOLOB8fVxhzWsUsSbKa0c8k2RpCqwqBT-shgOhvg/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-3 rounded-lg bg-[#1aff7c] text-[#101c29] font-bold shadow hover:bg-[#00e36a] transition-all"
+                className="inline-block px-6 py-3 rounded-lg bg-[#ff811a] text-[#101c29] font-bold shadow hover:bg-[#00e36a] transition-all"
               >
                 Register
               </a>
