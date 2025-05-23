@@ -134,8 +134,8 @@ export default function EventsPage() {
               </Link>
             )}
             {!event.available && (
-              <span className="inline-block mt-auto px-8 py-3 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-semibold shadow text-center cursor-not-allowed select-none">
-                Registration Closed
+              <span className="inline-block mt-auto px-8 py-3 rounded-xl bg-gray-300 dark:bg-emerald-700 text-white-500 dark:text-grey-300 font-semibold shadow text-center cursor-not-allowed select-none">
+                Register On Spot
               </span>
             )}
             {/* Glass overlay on hover */}
