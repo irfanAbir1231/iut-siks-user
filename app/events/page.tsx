@@ -5,23 +5,23 @@ import { useState, useEffect, useRef } from "react";
 const events = [
   {
     title: "Seerah Quiz",
-    date: "2025-05-25",
+    date: "2025-05-28",
     description:
       "Test your knowledge about the life of Prophet Muhammad (PBUH) in this engaging quiz.",
     route: "seerah-quiz",
     available: true,
   },
   {
-    title: "Halal Design & Calligraphy Competition",
-    date: "2025-05-25",
+    title: "Poster design competition",
+    date: "2025-05-26",
     description:
       "Showcase your creativity in designing and calligraphy with an Islamic theme.",
-    route: "halal-design-calligraphy",
+    route: "Poster-design--competition",
     available: true,
   },
   {
-    title: "Islamic Ideathon",
-    date: "2025-05-25",
+    title: "Case Competition",
+    date: "2025-05-28",
     description:
       "Brainstorm and present innovative ideas to solve challenges faced by the Muslim community.",
     route: "case-competition",
@@ -29,7 +29,15 @@ const events = [
   },
   {
     title: "Attention Maestro",
-    date: "2025-05-25",
+    date: "2025-05-28",
+    description:
+      "Participate in a fun and interactive event to test your focus and attention skills.",
+    route: "attention-maestro",
+    available: false,
+  },
+  {
+    title: "Archery Competition",
+    date: "2025-05-28",
     description:
       "Participate in a fun and interactive event to test your focus and attention skills.",
     route: "attention-maestro",
