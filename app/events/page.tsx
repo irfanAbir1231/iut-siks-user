@@ -9,7 +9,7 @@ const events = [
     description:
       "Test your knowledge about the life of Prophet Muhammad (PBUH) in this engaging quiz.",
     route: "seerah-quiz",
-    available: true,
+    available: false,
   },
   {
     title: "Poster design competition",
@@ -128,7 +128,7 @@ export default function EventsPage() {
             {event.available && (
               <Link
                 href={`/events/register/${event.route}`}
-                className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
               >
                 Register
               </Link>
