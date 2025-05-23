@@ -94,15 +94,15 @@ export default function Home() {
       gradient: "from-emerald-500 to-teal-600",
       delay: "0ms",
     },
-    {
-      title: "Blog",
-      href: "/blogs",
-      icon: "📝",
-      description: "Read insights, reflections, and knowledge articles",
-      color: "blue",
-      gradient: "from-blue-500 to-indigo-600",
-      delay: "100ms",
-    },
+    // {
+    //   title: "Blog",
+    //   href: "/blogs",
+    //   icon: "📝",
+    //   description: "Read insights, reflections, and knowledge articles",
+    //   color: "blue",
+    //   gradient: "from-blue-500 to-indigo-600",
+    //   delay: "100ms",
+    // },
     {
       title: "Prayer Times",
       href: "/prayer-times",
@@ -385,27 +385,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-3xl p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200 rounded-full opacity-20 transform translate-x-16 -translate-y-16" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-200 rounded-full opacity-20 transform -translate-x-16 translate-y-16" />
-
-            <div className="relative z-10">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">
-                Ready to Begin Your Journey?
-              </h2>
-              <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto"></p>
-              <SignInButton>
-                <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 animate-pulse-glow">
-                  Get Started Today
-                </button>
-              </SignInButton>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
@@ -416,8 +396,8 @@ export default function Home() {
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
                   <Image
-                    src="/path/to/image.jpg"
-                    alt="Description of image"
+                    src="/iut-siks-logo.jpg"
+                  alt="IUT SIKS Logo"
                     width={500}
                     height={300}
                     className="custom-class"
