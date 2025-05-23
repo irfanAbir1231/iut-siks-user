@@ -16,7 +16,7 @@ const events = [
     date: "2025-05-26",
     description:
       "Showcase your creativity in designing and calligraphy with an Islamic theme.",
-    route: "Poster-design--competition",
+    route: "poster-design-competition",
     available: true,
   },
   {
