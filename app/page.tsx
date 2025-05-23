@@ -49,9 +49,9 @@ export default function Home() {
   // Stats data and animated counts
   const stats = [
     { number: 500, label: "Members", suffix: "+" },
-    { number: 50, label: "Events", suffix: "+" },
+    { number: 20, label: "Events", suffix: "+" },
     { number: 100, label: "Articles", suffix: "+" },
-    { number: 5, label: "Years", suffix: "+" },
+    { number: 14, label: "Years", suffix: "+" },
   ];
   const count0 = useCountUp(stats[0].number, 1200);
   const count1 = useCountUp(stats[1].number, 1400);
