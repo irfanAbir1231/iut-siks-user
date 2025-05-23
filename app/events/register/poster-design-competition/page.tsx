@@ -34,8 +34,7 @@ export default function PosterDesignRegistration() {
               .
             </p>
             <p className="font-serif text-base text-gray-700 dark:text-gray-200 mb-4 text-center italic">
-              Explore real-world issues through the lens of Islam—address a
-              social issue or design a Shariah-compliant business model.
+              Showcase your creativity by designing a poster that visually communicates an Islamic theme or message. Focus on clarity, originality, and impactful presentation—let your artwork inspire and educate!
             </p>
           </section>
           {/* Rules Section */}
@@ -52,9 +51,6 @@ export default function PosterDesignRegistration() {
             </ul>
             <p className="font-serif text-lg text-[#b6e7c9] mt-2 text-center">
               Submission Deadline: <strong className="text-[#ff811a]">26 May 2025</strong>
-            </p>
-            <p className="font-mono text-lg text-white mt-2 text-center">
-              For more details, visit our <a href="https://example.com/rules" className="underline">official rules page</a>.
             </p>
           </section>
 
@@ -88,10 +84,24 @@ export default function PosterDesignRegistration() {
             <p className="font-mono text-lg text-[#b6e7c9] mb-4">
               For any queries, feel free to reach out:
             </p>
-            <ul className="font-mono text-lg text-[#b6e7c9] list-disc list-inside space-y-2">
-              <li>Email: <a href="mailto:siks@iut-dhaka.edu" className="text-[#6fff8b] underline">siks@iut-dhaka.edu</a></li>
-              <li>Phone: +880-1234-567890</li>
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-[#1b2a3d] p-4 rounded-lg shadow-md">
+                <h3 className="font-serif text-xl text-[#6fff8b] mb-2">Mohammad Illin Rahman</h3>
+                <p className="font-mono text-lg text-[#b6e7c9]">
+                  ✉️ <a href="mailto:illinrahman@iut-dhaka.edu" className="text-[#6fff8b] underline">illinrahman@iut-dhaka.edu</a><br />
+                  📞 +8801751636585<br />
+                  📱 WhatsApp: +8801576608666
+                </p>
+              </div>
+              <div className="bg-[#1b2a3d] p-4 rounded-lg shadow-md">
+                <h3 className="font-serif text-xl text-[#6fff8b] mb-2">Mahmudul Hasan Mahi</h3>
+                <p className="font-mono text-lg text-[#b6e7c9]">
+                  ✉️ <a href="mailto:mahmudulmahi@iut-dhaka.edu" className="text-[#6fff8b] underline">mahmudulmahi@iut-dhaka.edu</a><br />
+                  📞 +8801316171120<br />
+                  📱 WhatsApp: +8801316171120
+                </p>
+              </div>
+            </div>
           </section>
         </div>
       </div>

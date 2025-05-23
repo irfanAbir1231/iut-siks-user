@@ -54,8 +54,7 @@ export default function CaseCompetitionRegistration() {
               .
             </p>
             <p className="font-serif text-base text-gray-700 dark:text-gray-200 mb-4 text-center italic">
-              Explore real-world issues through the lens of Islam—address a
-              social issue or design a Shariah-compliant business model.
+              Dive into a unique competition where you’ll address real-world challenges or craft innovative, ethical business models, all through the lens of Islamic values—showcase your creativity, teamwork, and problem-solving skills while making a positive impact on society.
             </p>
           </section>
           {/* Event Details Section */}
@@ -128,10 +127,24 @@ export default function CaseCompetitionRegistration() {
             <p className="font-mono text-lg text-[#b6e7c9] mb-4">
               For any queries, feel free to reach out:
             </p>
-            <ul className="font-mono text-lg text-[#b6e7c9] list-disc list-inside space-y-2">
-              <li>Email: <a href="mailto:siks@iut-dhaka.edu" className="text-[#6fff8b] underline">siks@iut-dhaka.edu</a></li>
-              <li>Phone: +880-1234-567890</li>
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-[#1b2a3d] p-4 rounded-lg shadow-md">
+                <h3 className="font-serif text-xl text-[#6fff8b] mb-2">Mohammad Illin Rahman</h3>
+                <p className="font-mono text-lg text-[#b6e7c9]">
+                  ✉️ <a href="mailto:illinrahman@iut-dhaka.edu" className="text-[#6fff8b] underline">illinrahman@iut-dhaka.edu</a><br />
+                  📞 +8801751636585<br />
+                  📱 WhatsApp: +8801576608666
+                </p>
+              </div>
+              <div className="bg-[#1b2a3d] p-4 rounded-lg shadow-md">
+                <h3 className="font-serif text-xl text-[#6fff8b] mb-2">Mahmudul Hasan Mahi</h3>
+                <p className="font-mono text-lg text-[#b6e7c9]">
+                  ✉️ <a href="mailto:mahmudulmahi@iut-dhaka.edu" className="text-[#6fff8b] underline">mahmudulmahi@iut-dhaka.edu</a><br />
+                  📞 +8801316171120<br />
+                  📱 WhatsApp: +8801316171120
+                </p>
+              </div>
+            </div>
           </section>
         </div>
       </div>
