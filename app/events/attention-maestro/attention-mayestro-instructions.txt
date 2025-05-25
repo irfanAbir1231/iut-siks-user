@@ -1,0 +1,35 @@
+In this attention maestro,
+there will be a quiz fo 10 questions
+userrs will get only 10 minutes to complete the quiz
+
+the quiz will be having 4 options A,B,C,D only 1 correct answer
+ther will also be a /attention-maestro/results page which will show the results
+the values of the score of the users will be stored in the database
+the results will be shown in a table with the following columns sorted by the score in descending order
+name
+score
+time taken
+
+the user can take the quiz only once
+the scoring will be done as follows - 
+the users with the highest score and least amount of time will be the winners
+
+make
+- a model for the quiz
+- a model for the results
+- a page for the quiz
+- a page for the results
+
+create the models ad the /api routes for the two pages 
+only authenticated users can take the quiz
+
+
+we need to make connection withthe db, make a mongobd model of the quizwes and results 
+also Get post puut delet functiond for them in each seapareate /api/ rotues 
+and conenct ethem withthe front end pages , so that the quiz can be taken and the results can be shown
+
+for the quiz
+a user can take the quiz multiple times and submit and his score  will be stored in the database
+the results will be shown in the results page, but it is not working the post method is senfing error code 500
+
+
