@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   await mongoose.connect(process.env.MONGODB_URI!);
+    console.log("Quiz timer route accessed");
   const timer = await QuizTimer.findOne().sort({ _id: -1 });
   if (!timer) return NextResponse.json({ error: "Timer not set" }, { status: 404 });
   return NextResponse.json({
