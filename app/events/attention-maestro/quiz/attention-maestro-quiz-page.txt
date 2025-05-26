@@ -1,0 +1,8 @@
+in the quiz age the  page should be  like this
+1. the page should be responsive
+2. the page should have a timer which will be fetched from the backend
+    - The quiz will not start untill  it is ti,e
+    - The page will show the time remaining
+3. quiz only will bea abvailable for  logged in user
+4. As soon as the quiz starts the duration will start counting down and it will be shown in the top of the page
+5. If the timer ends or the user clicks on the submit button the quiz will be submitted and the result will be shown

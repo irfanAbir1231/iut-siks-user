@@ -1,139 +1,130 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 
-export default function QuizPage() {
+interface Question {
+  question: string;
+  options: string[];
+  answer: number;
+}
+
+interface Quiz {
+  _id: string;
+  title: string;
+  questions: Question[];
+  duration?: number;
+}
+
+export default function AttentionMaestroQuizPage() {
   const { isSignedIn, user } = useUser();
-  const router = useRouter();
-  interface Question {
-    question: string;
-    options: string[];
-    answer: number;
-  }
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null); // null until loaded
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [quizTimerLoading, setQuizTimerLoading] = useState(true);
-  const [quizStartCountdown, setQuizStartCountdown] = useState<number | null>(null); // seconds until quiz starts
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [timer, setTimer] = useState<{ startDate: string; startTimer: string; duration: number } | null>(null);
+  const [now, setNow] = useState<Date>(new Date());
   const [quizStarted, setQuizStarted] = useState(false);
-  const [quizDuration, setQuizDuration] = useState<number | null>(null); // seconds for quiz duration
-  const [timerData, setTimerData] = useState<{ startDate: string; startTimer: string; duration: number } | null>(null);
+  const [countdown, setCountdown] = useState<number>(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Fetch quiz and timer
   useEffect(() => {
     fetch("/api/events/attention-maestro/quiz")
       .then((res) => res.json())
-      .then((data: { questions: Question[] }[]) => {
-        // Combine all questions from all quizzes
-        const allQuestions = data.flatMap((quiz) => quiz.questions);
-        setQuestions(allQuestions);
-        setAnswers(Array(allQuestions.length).fill(null));
-        setLoading(false);
+      .then((data) => {
+        if (data && data.length > 0) {
+          setQuiz(data[0]);
+          setAnswers(Array(data[0].questions.length).fill(-1));
+        }
       });
-  }, []);
-
-  useEffect(() => {
     fetch("/api/events/attention-maestro/quiz-timer")
       .then((res) => res.json())
-      .then((timer) => {
-        if (!timer.startDate || !timer.startTimer || !timer.duration) {
-          setTimeLeft(0);
-          setQuizTimerLoading(false);
-          return;
-        }
-        setTimerData({
-          startDate: timer.startDate,
-          startTimer: timer.startTimer,
-          duration: timer.duration,
-        });
-        setQuizTimerLoading(false);
+      .then((data) => {
+        if (!data.error) setTimer(data);
       });
   }, []);
 
+  // Timer logic
   useEffect(() => {
-    if (!timerData) return;
-    const datePart = typeof timerData.startDate === "string"
-      ? timerData.startDate.slice(0, 10)
-      : new Date(timerData.startDate).toISOString().slice(0, 10);
-    const startDateTime = new Date(`${datePart}T${timerData.startTimer}`);
-    const now = new Date();
-    const secondsUntilStart = Math.floor((startDateTime.getTime() - now.getTime()) / 1000);
-    if (secondsUntilStart > 0) {
-      setQuizStartCountdown(secondsUntilStart);
-      setQuizStarted(false);
-      setTimeLeft(timerData.duration);
-      setQuizDuration(timerData.duration);
-    } else {
-      // Quiz already started
-      const elapsed = Math.floor((now.getTime() - startDateTime.getTime()) / 1000);
-      const remaining = timerData.duration - elapsed;
-      setQuizStartCountdown(0);
-      setQuizStarted(true);
-      setTimeLeft(remaining > 0 ? remaining : 0);
-      setQuizDuration(timerData.duration);
-    }
-  }, [timerData]);
+    if (!timer) return;
+    const updateNow = () => setNow(new Date());
+    intervalRef.current = setInterval(updateNow, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [timer]);
 
-  // Countdown until quiz starts
-  useEffect(() => {
-    if (quizStartCountdown === null || quizStarted) return;
-    if (quizStartCountdown <= 0) {
-      setQuizStarted(true);
-      setQuizStartCountdown(0);
-      setTimeLeft(quizDuration);
-      return;
-    }
-    const timer = setInterval(() => {
-      setQuizStartCountdown((t) => (t !== null ? t - 1 : null));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [quizStartCountdown, quizStarted, quizDuration]);
-
-  // Quiz timer countdown
-  useEffect(() => {
-    if (!quizStarted || submitted || timeLeft === null) return;
-    if (timeLeft === 0) handleSubmit();
-    const timer = setInterval(() => {
-      setTimeLeft((t) => (t !== null && t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [quizStarted, timeLeft, submitted]);
-
-  function handleOption(qIdx: number, oIdx: number) {
-    if (submitted) return;
-    setAnswers((prev) => prev.map((a, i) => (i === qIdx ? oIdx : a)));
+  // Calculate quiz start and end
+  let quizStart: Date | null = null;
+  let quizEnd: Date | null = null;
+  if (timer) {
+    // Parse startDate as local date (not UTC)
+    const dateObj = new Date(timer.startDate);
+    const [h, m, s] = timer.startTimer.split(":").map(Number);
+    // Create a new Date in local time with the correct date and time
+    quizStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), h, m, s, 0);
+    quizEnd = new Date(quizStart.getTime() + timer.duration * 1000);
   }
 
-  function handleSubmit() {
-    if (submitted) return;
-    setSubmitted(true);
-    // Calculate score
-    const score = answers.reduce((acc, a, i) => (a === questions[i]?.answer ? acc + 1 : acc), 0);
-    // Send to API
-    fetch("/api/events/attention-maestro/results", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: user?.id,
-        name: user?.username || user?.firstName || "Anonymous",
-        score,
-        timeTaken: timeLeft !== null ? (timeLeft >= 0 ? (600 - timeLeft) : 600) : 600,
-        answers,
-      }),
+  // Start quiz when time arrives
+  useEffect(() => {
+    if (!quizStart || !quizEnd) return;
+    if (!quizStarted && now >= quizStart && now < quizEnd) {
+      setQuizStarted(true);
+      setCountdown(Math.floor((quizEnd.getTime() - now.getTime()) / 1000));
+    } else if (quizStarted && now < quizEnd) {
+      setCountdown(Math.max(0, Math.floor((quizEnd.getTime() - now.getTime()) / 1000)));
+    } else if (quizStarted && now >= quizEnd && !result) {
+      handleSubmit();
+    }
+  }, [now, quizStarted, quizStart, quizEnd, result]);
+
+  // Handle answer change
+  const handleOptionChange = (qIdx: number, optIdx: number) => {
+    setAnswers((prev) => {
+      const copy = [...prev];
+      copy[qIdx] = optIdx;
+      return copy;
     });
-    setTimeout(() => router.push("/events/attention-maestro/results"), 1500);
-  }
+  };
 
-  if (loading || quizTimerLoading || timeLeft === null) {
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
-        <div className="text-blue-700 font-semibold">Loading quiz...</div>
-      </main>
-    );
-  }
+  // Submit quiz
+  const handleSubmit = async () => {
+    if (submitting || !quiz || !user || result) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const timeTaken = quizEnd && quizStart ? Math.min(Math.floor((now.getTime() - quizStart.getTime()) / 1000), timer?.duration || 0) : 0;
+      const res = await fetch("/api/events/attention-maestro/results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          name: user.fullName || user.username || "User",
+          score: answers.reduce(
+            (acc: number, ans: number, idx: number) =>
+              acc + (ans === quiz.questions[idx].answer ? 1 : 0),
+            0
+          ),
+          timeTaken,
+          answers,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResult(data.result);
+      } else {
+        setError(data.error || "Failed to submit quiz");
+      }
+    } catch (e) {
+      setError((e as Error).message || "Failed to submit quiz");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
+  // UI
   if (!isSignedIn) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
@@ -146,13 +137,60 @@ export default function QuizPage() {
     );
   }
 
-  if (!quizStarted && quizStartCountdown !== null && quizStartCountdown > 0) {
-    // Show countdown until quiz starts
+  if (!quiz || !timer) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
-        <div className="text-2xl font-bold text-blue-700 mb-4">Quiz will start soon!</div>
-        <div className="text-lg text-gray-700">Time until quiz starts:</div>
-        <div className="text-4xl font-mono text-emerald-700 mt-2">{Math.floor(quizStartCountdown / 60)}:{(quizStartCountdown % 60).toString().padStart(2, '0')}</div>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
+        <div className="text-blue-700 font-semibold text-xl">Loading quiz...</div>
+      </main>
+    );
+  }
+
+  if (result) {
+    return (
+      <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-2xl w-full p-8 mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-emerald-700 mb-2 text-center">Quiz Submitted!</h1>
+          <div className="text-gray-700 text-lg text-center mb-4">Thank you for participating.</div>
+          <div className="text-center mt-6">
+            <a href="/events/attention-maestro/results" className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">View Results</a>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!quizStarted && quizEnd && now >= quizEnd) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-xl w-full p-8 mb-10 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Quiz is over</h1>
+          <div className="text-gray-500 text-lg mb-6">The quiz has ended. Please check the results page.</div>
+          <div className="text-center mt-6">
+            <a href="/events/attention-maestro/results" className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">View Results</a>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!quizStarted) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-xl w-full p-8 mb-10 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Attention Maestro Quiz</h1>
+          <div className="text-gray-500 text-lg mb-6">The quiz will start soon.</div>
+          <div className="text-2xl font-semibold text-blue-700 mb-2">Time Remaining to Start:</div>
+          <div className="text-4xl font-mono text-emerald-600 mb-4">
+            {quizStart && now < quizStart ? formatTime(Math.floor((quizStart.getTime() - now.getTime()) / 1000)) : "00:00:00"}
+          </div>
+          {/* Debug output */}
+          <div className="mt-6 text-left text-xs text-gray-500">
+            <div>Now: {now.toString()}</div>
+            <div>Quiz Start: {quizStart?.toString()}</div>
+            <div>Quiz End: {quizEnd?.toString()}</div>
+            <div>Timer Raw: {JSON.stringify(timer)}</div>
+          </div>
+        </div>
       </main>
     );
   }
@@ -160,27 +198,71 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
       <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-2xl w-full p-8 mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-center">Attention Maestro Quiz</h1>
-        <div className="text-gray-500 text-sm mb-6 text-center">You have 10 minutes. Answer all questions and submit!</div>
-        <div className="flex justify-center mb-6">
-          <span className="inline-block px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">Time Left: {Math.floor((timeLeft ?? 0)/60)}:{((timeLeft ?? 0)%60).toString().padStart(2, '0')}</span>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-0">Attention Maestro Quiz</h1>
+          <div className="flex flex-col items-center">
+            <span className="text-gray-500 text-sm">Time Remaining</span>
+            <span className="text-2xl font-mono text-emerald-600">{formatTime(countdown)}</span>
+          </div>
         </div>
-        <form onSubmit={e => { e.preventDefault(); handleSubmit(); }} className="flex flex-col gap-8">
-          {questions.map((q, idx) => (
-            <div key={idx} className="mb-4">
-              <div className="font-semibold text-lg text-emerald-700 mb-2">Q{idx+1}. {q.question}</div>
-              <div className="grid grid-cols-2 gap-4">
-                {q.options.map((opt: string, oIdx: number) => (
-                  <button type="button" key={oIdx} onClick={() => handleOption(idx, oIdx)}
-                    className={`px-4 py-2 rounded-lg border font-medium shadow transition-colors duration-150 ${answers[idx] === oIdx ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-emerald-100'}`}
-                  >{opt}</button>
-                ))}
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <div className="space-y-8">
+            {quiz.questions.map((q, qIdx) => (
+              <div key={qIdx} className="mb-6">
+                <div className="font-semibold text-lg text-gray-800 mb-2">
+                  Q{qIdx + 1}. {q.question}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-black">
+                  {q.options.map((opt, optIdx) => (
+                    <label
+                      key={optIdx}
+                      className={`flex items-center px-4 py-3 rounded-lg border cursor-pointer transition-colors duration-150 ${answers[qIdx] === optIdx ? "bg-blue-100 border-blue-400 text-blue-900" : "bg-gray-50 border-gray-200 hover:bg-blue-50"}`}
+                    >
+                      <input
+                        type="radio"
+                        name={`q${qIdx}`}
+                        value={optIdx}
+                        checked={answers[qIdx] === optIdx}
+                        onChange={() => handleOptionChange(qIdx, optIdx)}
+                        className="form-radio mr-3 accent-blue-600"
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-          <button type="submit" disabled={submitted} className="self-end px-8 py-3 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-colors duration-150 mt-4">Submit Quiz</button>
+            ))}
+          </div>
+          {error && <div className="text-red-600 text-center mt-4">{error}</div>}
+          <div className="flex justify-center mt-8">
+            <button
+              type="submit"
+              className="px-8 py-3 rounded-lg bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors duration-150 disabled:opacity-60"
+              disabled={submitting || !!result}
+            >
+              {submitting ? "Submitting..." : "Submit Quiz"}
+            </button>
+          </div>
         </form>
       </div>
     </main>
   );
-} 
+}
+
+function formatTime(seconds: number) {
+  const h = Math.floor(seconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const m = Math.floor((seconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
