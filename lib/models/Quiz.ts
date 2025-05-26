@@ -10,6 +10,8 @@ export interface QuizDocument extends Document {
   title: string;
   questions: Question[];
   createdAt: Date;
+  startTime?: Date;
+  duration?: number; // in seconds
 }
 
 const QuestionSchema = new mongoose.Schema<Question>({
@@ -39,6 +41,14 @@ const QuizSchema = new mongoose.Schema<QuizDocument>({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  startTime: {
+    type: Date,
+    required: false,
+  },
+  duration: {
+    type: Number, // in seconds
+    required: false,
   },
 });
 

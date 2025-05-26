@@ -50,7 +50,12 @@ export default function ResultsPage() {
                 </tr>
               </thead>
               <tbody>
-                {results
+                {(results as Array<{
+                  score: number;
+                  timeTaken: number;
+                  userId: string;
+                  name: string;
+                }>)
                   .sort((a, b) => b.score - a.score || a.timeTaken - b.timeTaken)
                   .map((r, idx) => (
                     <tr key={r.userId} className={idx % 2 === 0 ? "bg-white" : "bg-blue-50"}>

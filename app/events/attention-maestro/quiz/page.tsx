@@ -13,9 +13,14 @@ export default function QuizPage() {
   }
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [timeLeft, setTimeLeft] = useState<number | null>(null); // null until loaded
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [quizTimerLoading, setQuizTimerLoading] = useState(true);
+  const [quizStartCountdown, setQuizStartCountdown] = useState<number | null>(null); // seconds until quiz starts
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizDuration, setQuizDuration] = useState<number | null>(null); // seconds for quiz duration
+  const [timerData, setTimerData] = useState<{ startDate: string; startTimer: string; duration: number } | null>(null);
 
   useEffect(() => {
     fetch("/api/events/attention-maestro/quiz")
@@ -30,11 +35,71 @@ export default function QuizPage() {
   }, []);
 
   useEffect(() => {
-    if (submitted) return;
-    if (timeLeft === 0) handleSubmit();
-    const timer = setInterval(() => setTimeLeft((t) => (t > 0 ? t - 1 : 0)), 1000);
+    fetch("/api/events/attention-maestro/quiz-timer")
+      .then((res) => res.json())
+      .then((timer) => {
+        if (!timer.startDate || !timer.startTimer || !timer.duration) {
+          setTimeLeft(0);
+          setQuizTimerLoading(false);
+          return;
+        }
+        setTimerData({
+          startDate: timer.startDate,
+          startTimer: timer.startTimer,
+          duration: timer.duration,
+        });
+        setQuizTimerLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!timerData) return;
+    const datePart = typeof timerData.startDate === "string"
+      ? timerData.startDate.slice(0, 10)
+      : new Date(timerData.startDate).toISOString().slice(0, 10);
+    const startDateTime = new Date(`${datePart}T${timerData.startTimer}`);
+    const now = new Date();
+    const secondsUntilStart = Math.floor((startDateTime.getTime() - now.getTime()) / 1000);
+    if (secondsUntilStart > 0) {
+      setQuizStartCountdown(secondsUntilStart);
+      setQuizStarted(false);
+      setTimeLeft(timerData.duration);
+      setQuizDuration(timerData.duration);
+    } else {
+      // Quiz already started
+      const elapsed = Math.floor((now.getTime() - startDateTime.getTime()) / 1000);
+      const remaining = timerData.duration - elapsed;
+      setQuizStartCountdown(0);
+      setQuizStarted(true);
+      setTimeLeft(remaining > 0 ? remaining : 0);
+      setQuizDuration(timerData.duration);
+    }
+  }, [timerData]);
+
+  // Countdown until quiz starts
+  useEffect(() => {
+    if (quizStartCountdown === null || quizStarted) return;
+    if (quizStartCountdown <= 0) {
+      setQuizStarted(true);
+      setQuizStartCountdown(0);
+      setTimeLeft(quizDuration);
+      return;
+    }
+    const timer = setInterval(() => {
+      setQuizStartCountdown((t) => (t !== null ? t - 1 : null));
+    }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, submitted]);
+  }, [quizStartCountdown, quizStarted, quizDuration]);
+
+  // Quiz timer countdown
+  useEffect(() => {
+    if (!quizStarted || submitted || timeLeft === null) return;
+    if (timeLeft === 0) handleSubmit();
+    const timer = setInterval(() => {
+      setTimeLeft((t) => (t !== null && t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [quizStarted, timeLeft, submitted]);
 
   function handleOption(qIdx: number, oIdx: number) {
     if (submitted) return;
@@ -54,14 +119,14 @@ export default function QuizPage() {
         userId: user?.id,
         name: user?.username || user?.firstName || "Anonymous",
         score,
-        timeTaken: 600 - timeLeft,
+        timeTaken: timeLeft !== null ? (timeLeft >= 0 ? (600 - timeLeft) : 600) : 600,
         answers,
       }),
     });
     setTimeout(() => router.push("/events/attention-maestro/results"), 1500);
   }
 
-  if (loading) {
+  if (loading || quizTimerLoading || timeLeft === null) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
         <div className="text-blue-700 font-semibold">Loading quiz...</div>
@@ -81,13 +146,24 @@ export default function QuizPage() {
     );
   }
 
+  if (!quizStarted && quizStartCountdown !== null && quizStartCountdown > 0) {
+    // Show countdown until quiz starts
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
+        <div className="text-2xl font-bold text-blue-700 mb-4">Quiz will start soon!</div>
+        <div className="text-lg text-gray-700">Time until quiz starts:</div>
+        <div className="text-4xl font-mono text-emerald-700 mt-2">{Math.floor(quizStartCountdown / 60)}:{(quizStartCountdown % 60).toString().padStart(2, '0')}</div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
       <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-2xl w-full p-8 mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-center">Attention Maestro Quiz</h1>
         <div className="text-gray-500 text-sm mb-6 text-center">You have 10 minutes. Answer all questions and submit!</div>
         <div className="flex justify-center mb-6">
-          <span className="inline-block px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">Time Left: {Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2, '0')}</span>
+          <span className="inline-block px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">Time Left: {Math.floor((timeLeft ?? 0)/60)}:{((timeLeft ?? 0)%60).toString().padStart(2, '0')}</span>
         </div>
         <form onSubmit={e => { e.preventDefault(); handleSubmit(); }} className="flex flex-col gap-8">
           {questions.map((q, idx) => (
