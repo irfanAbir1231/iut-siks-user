@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
 
 interface Question {
@@ -18,7 +18,11 @@ interface Quiz {
 export default function AttentionMaestroQuizPage() {
   const { isSignedIn, user } = useUser();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [timer, setTimer] = useState<{ startDate: string; startTimer: string; duration: number } | null>(null);
+  const [timer, setTimer] = useState<{
+    startDate: string;
+    startTimer: string;
+    duration: number;
+  } | null>(null);
   const [now, setNow] = useState<Date>(new Date());
   const [quizStarted, setQuizStarted] = useState(false);
   const [countdown, setCountdown] = useState<number>(0);
@@ -26,7 +30,70 @@ export default function AttentionMaestroQuizPage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quizStart, setQuizStart] = useState<Date | null>(null);
+  const [quizEnd, setQuizEnd] = useState<Date | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Calculate quiz start and end times
+  useEffect(() => {
+    if (timer) {
+      const dateObj = new Date(timer.startDate);
+      const [h, m, s] = timer.startTimer.split(":").map(Number);
+      const start = new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        h,
+        m,
+        s,
+        0
+      );
+      const end = new Date(start.getTime() + timer.duration * 1000);
+      setQuizStart(start);
+      setQuizEnd(end);
+    }
+  }, [timer]);
+
+  // Submit quiz
+  const handleSubmit = useCallback(async () => {
+    if (submitting || !quiz || !user || result) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const timeTaken =
+        quizEnd && quizStart
+          ? Math.min(
+              Math.floor((now.getTime() - quizStart.getTime()) / 1000),
+              timer?.duration || 0
+            )
+          : 0;
+      const res = await fetch("/api/events/attention-maestro/results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          name: user.fullName || user.username || "User",
+          score: answers.reduce(
+            (acc: number, ans: number, idx: number) =>
+              acc + (ans === quiz.questions[idx].answer ? 1 : 0),
+            0
+          ),
+          timeTaken,
+          answers,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResult(data.result);
+      } else {
+        setError(data.error || "Failed to submit quiz");
+      }
+    } catch (e) {
+      setError((e as Error).message || "Failed to submit quiz");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submitting, quiz, user, result, quizEnd, quizStart, now, timer, answers]);
 
   // Fetch quiz and timer
   useEffect(() => {
@@ -54,19 +121,6 @@ export default function AttentionMaestroQuizPage() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [timer]);
-
-  // Calculate quiz start and end
-  let quizStart: Date | null = null;
-  let quizEnd: Date | null = null;
-  if (timer) {
-    // Parse startDate as local date (not UTC)
-    const dateObj = new Date(timer.startDate);
-    const [h, m, s] = timer.startTimer.split(":").map(Number);
-    // Create a new Date in local time with the correct date and time
-    quizStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), h, m, s, 0);
-    quizEnd = new Date(quizStart.getTime() + timer.duration * 1000);
-  }
-
   // Start quiz when time arrives
   useEffect(() => {
     if (!quizStart || !quizEnd) return;
@@ -74,11 +128,13 @@ export default function AttentionMaestroQuizPage() {
       setQuizStarted(true);
       setCountdown(Math.floor((quizEnd.getTime() - now.getTime()) / 1000));
     } else if (quizStarted && now < quizEnd) {
-      setCountdown(Math.max(0, Math.floor((quizEnd.getTime() - now.getTime()) / 1000)));
+      setCountdown(
+        Math.max(0, Math.floor((quizEnd.getTime() - now.getTime()) / 1000))
+      );
     } else if (quizStarted && now >= quizEnd && !result) {
       handleSubmit();
     }
-  }, [now, quizStarted, quizStart, quizEnd, result]);
+  }, [now, quizStarted, quizStart, quizEnd, result, handleSubmit]);
 
   // Handle answer change
   const handleOptionChange = (qIdx: number, optIdx: number) => {
@@ -87,41 +143,6 @@ export default function AttentionMaestroQuizPage() {
       copy[qIdx] = optIdx;
       return copy;
     });
-  };
-
-  // Submit quiz
-  const handleSubmit = async () => {
-    if (submitting || !quiz || !user || result) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const timeTaken = quizEnd && quizStart ? Math.min(Math.floor((now.getTime() - quizStart.getTime()) / 1000), timer?.duration || 0) : 0;
-      const res = await fetch("/api/events/attention-maestro/results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          name: user.fullName || user.username || "User",
-          score: answers.reduce(
-            (acc: number, ans: number, idx: number) =>
-              acc + (ans === quiz.questions[idx].answer ? 1 : 0),
-            0
-          ),
-          timeTaken,
-          answers,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResult(data.result);
-      } else {
-        setError(data.error || "Failed to submit quiz");
-      }
-    } catch (e) {
-      setError((e as Error).message || "Failed to submit quiz");
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   // UI
@@ -140,7 +161,9 @@ export default function AttentionMaestroQuizPage() {
   if (!quiz || !timer) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
-        <div className="text-blue-700 font-semibold text-xl">Loading quiz...</div>
+        <div className="text-blue-700 font-semibold text-xl">
+          Loading quiz...
+        </div>
       </main>
     );
   }
@@ -149,10 +172,19 @@ export default function AttentionMaestroQuizPage() {
     return (
       <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
         <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-2xl w-full p-8 mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-emerald-700 mb-2 text-center">Quiz Submitted!</h1>
-          <div className="text-gray-700 text-lg text-center mb-4">Thank you for participating.</div>
+          <h1 className="text-3xl md:text-4xl font-bold text-emerald-700 mb-2 text-center">
+            Quiz Submitted!
+          </h1>
+          <div className="text-gray-700 text-lg text-center mb-4">
+            Thank you for participating.
+          </div>
           <div className="text-center mt-6">
-            <a href="/events/attention-maestro/results" className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">View Results</a>
+            <a
+              href="/events/attention-maestro/results"
+              className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150"
+            >
+              View Results
+            </a>
           </div>
         </div>
       </main>
@@ -163,10 +195,19 @@ export default function AttentionMaestroQuizPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
         <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-xl w-full p-8 mb-10 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Quiz is over</h1>
-          <div className="text-gray-500 text-lg mb-6">The quiz has ended. Please check the results page.</div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Quiz is over
+          </h1>
+          <div className="text-gray-500 text-lg mb-6">
+            The quiz has ended. Please check the results page.
+          </div>
           <div className="text-center mt-6">
-            <a href="/events/attention-maestro/results" className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">View Results</a>
+            <a
+              href="/events/attention-maestro/results"
+              className="inline-block px-6 py-3 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150"
+            >
+              View Results
+            </a>
           </div>
         </div>
       </main>
@@ -177,11 +218,21 @@ export default function AttentionMaestroQuizPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
         <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-xl w-full p-8 mb-10 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Attention Maestro Quiz</h1>
-          <div className="text-gray-500 text-lg mb-6">The quiz will start soon.</div>
-          <div className="text-2xl font-semibold text-blue-700 mb-2">Time Remaining to Start:</div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Attention Maestro Quiz
+          </h1>
+          <div className="text-gray-500 text-lg mb-6">
+            The quiz will start soon.
+          </div>
+          <div className="text-2xl font-semibold text-blue-700 mb-2">
+            Time Remaining to Start:
+          </div>
           <div className="text-4xl font-mono text-emerald-600 mb-4">
-            {quizStart && now < quizStart ? formatTime(Math.floor((quizStart.getTime() - now.getTime()) / 1000)) : "00:00:00"}
+            {quizStart && now < quizStart
+              ? formatTime(
+                  Math.floor((quizStart.getTime() - now.getTime()) / 1000)
+                )
+              : "00:00:00"}
           </div>
           {/* Debug output */}
           <div className="mt-6 text-left text-xs text-gray-500">
@@ -199,14 +250,18 @@ export default function AttentionMaestroQuizPage() {
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-12">
       <div className="bg-white rounded-2xl shadow-md border border-gray-200 max-w-2xl w-full p-8 mb-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-0">Attention Maestro Quiz</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-0">
+            Attention Maestro Quiz
+          </h1>
           <div className="flex flex-col items-center">
             <span className="text-gray-500 text-sm">Time Remaining</span>
-            <span className="text-2xl font-mono text-emerald-600">{formatTime(countdown)}</span>
+            <span className="text-2xl font-mono text-emerald-600">
+              {formatTime(countdown)}
+            </span>
           </div>
         </div>
         <form
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
           }}
@@ -221,7 +276,11 @@ export default function AttentionMaestroQuizPage() {
                   {q.options.map((opt, optIdx) => (
                     <label
                       key={optIdx}
-                      className={`flex items-center px-4 py-3 rounded-lg border cursor-pointer transition-colors duration-150 ${answers[qIdx] === optIdx ? "bg-blue-100 border-blue-400 text-blue-900" : "bg-gray-50 border-gray-200 hover:bg-blue-50"}`}
+                      className={`flex items-center px-4 py-3 rounded-lg border cursor-pointer transition-colors duration-150 ${
+                        answers[qIdx] === optIdx
+                          ? "bg-blue-100 border-blue-400 text-blue-900"
+                          : "bg-gray-50 border-gray-200 hover:bg-blue-50"
+                      }`}
                     >
                       <input
                         type="radio"
@@ -238,7 +297,9 @@ export default function AttentionMaestroQuizPage() {
               </div>
             ))}
           </div>
-          {error && <div className="text-red-600 text-center mt-4">{error}</div>}
+          {error && (
+            <div className="text-red-600 text-center mt-4">{error}</div>
+          )}
           <div className="flex justify-center mt-8">
             <button
               type="submit"
