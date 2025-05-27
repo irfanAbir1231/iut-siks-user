@@ -9,7 +9,7 @@ import {
   useUser,
   SignOutButton,
 } from "@clerk/nextjs";
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser();
@@ -89,7 +89,7 @@ export default function Navbar() {
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 dark:bg-gray-950/95 backdrop-blur-lg shadow-lg border-b border-gray-200/50 dark:border-gray-800/50"
+          ? "bg-gradient-to-r from-emerald-100/90 via-emerald-200/80 to-teal-100/90 dark:from-emerald-900/80 dark:via-emerald-950/80 dark:to-teal-900/80 backdrop-blur-lg shadow-lg"
           : "bg-transparent"
       }`}
     >
@@ -104,13 +104,13 @@ export default function Navbar() {
                   alt="IUT SIKS Logo"
                   width={40}
                   height={40}
-                  className="w-10 h-10 rounded-full object-cover shadow-lg"
+                  className="w-10 h-10 rounded-full object-cover bg-white shadow-lg"
                 />
               </div>
               <div className="flex flex-col">
                 <span
                   className={`font-bold text-xl tracking-tight transition-colors ${
-                    isScrolled ? "text-gray-800" : "text-white"
+                    isScrolled ? "text-gray-900 dark:text-white" : "text-white"
                   } group-hover:text-emerald-600`}
                 >
                   IUT SIKS
@@ -131,7 +131,7 @@ export default function Navbar() {
                       ? "text-emerald-600 bg-emerald-50"
                       : "text-emerald-100 bg-white/20"
                     : isScrolled
-                    ? "text-gray-700 hover:text-emerald-600 hover:bg-emerald-50"
+                    ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
                     : "text-white/90 hover:text-white hover:bg-white/20"
                 }`}
               >
@@ -191,7 +191,7 @@ export default function Navbar() {
                   <button
                     className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isScrolled
-                        ? "text-gray-700 hover:bg-gray-100"
+                        ? "text-gray-900 dark:text-white hover:bg-gray-100"
                         : "text-white hover:bg-white/20"
                     }`}
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -261,7 +261,7 @@ export default function Navbar() {
                     <button
                       className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                         isScrolled
-                          ? "text-gray-700 hover:text-emerald-600 hover:bg-emerald-50"
+                          ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
                           : "text-white hover:bg-white/20"
                       }`}
                     >
@@ -284,7 +284,7 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`inline-flex items-center justify-center p-2 rounded-xl transition-all duration-200 ${
                 isScrolled
-                  ? "text-gray-700 hover:bg-gray-100"
+                  ? "text-gray-900 dark:text-white hover:bg-gray-100"
                   : "text-white hover:bg-white/20"
               }`}
             >
@@ -318,117 +318,125 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex items-start justify-end">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+      <div
+        className={`md:hidden fixed inset-0 z-50 flex items-start justify-end transition-all duration-300 ease-in-out transform ${
+          isMenuOpen ? "visible opacity-100" : "invisible opacity-0"
+        }`}
+      >
+        {/* Overlay */}
+        <div
+          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-all duration-300 ${
+            isMenuOpen ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+        />
+        {/* Menu panel */}
+        <div
+          className={`relative w-80 max-w-full h-full bg-gradient-to-br from-white/80 to-emerald-50 dark:from-gray-900/90 dark:to-gray-800/90 shadow-2xl rounded-l-2xl backdrop-blur-xl p-0 flex flex-col transition-all duration-300 ease-in-out transform ${
+            isMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition"
             onClick={() => setIsMenuOpen(false)}
-          />
-          {/* Menu panel */}
-          <div className="relative w-80 max-w-full h-full bg-gradient-to-br from-white/80 to-emerald-50 dark:from-gray-900/90 dark:to-gray-800/90 shadow-2xl rounded-l-2xl backdrop-blur-xl p-0 animate-in slide-in-from-right-20 duration-300 flex flex-col">
-            {/* Close button */}
-            <button
-              className="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition"
-              onClick={() => setIsMenuOpen(false)}
-              aria-label="Close menu"
+            aria-label="Close menu"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            {/* Brand */}
-            <div className="flex items-center gap-3 px-6 pt-6 pb-4">
-              <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg">
-                <Image
-                  src="/iut-siks-logo.jpg"
-                  alt="IUT SIKS Logo"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-xl tracking-tight text-gray-800 dark:text-white">
-                  IUT SIKS
-                </span>
-              </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          {/* Brand */}
+          <div className="flex items-center gap-3 px-6 pt-6 pb-4">
+            <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg">
+              <Image
+                src="/iut-siks-logo.jpg"
+                alt="IUT SIKS Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover bg-white shadow-lg"
+              />
             </div>
-            {/* Nav links */}
-            <div className="flex-1 flex flex-col gap-2 px-4 mt-2">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ${
-                    isActive(link.href)
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow border border-emerald-200 dark:border-emerald-700"
-                      : "text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-            {/* Divider */}
-            <div className="my-4 border-t border-gray-200 dark:border-gray-700 mx-4" />
-            {/* User actions */}
-            <div className="px-4 pb-8 flex flex-col gap-2">
-              {isSignedIn ? (
-                <>
-                  <div className="px-2 py-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {user?.firstName || user?.username}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {user?.emailAddresses[0]?.emailAddress}
-                    </p>
-                  </div>
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Profile
-                  </Link>
-                  <SignOutButton redirectUrl={pathname}>
-                    <button
-                      className="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign Out
-                    </button>
-                  </SignOutButton>
-                </>
-              ) : (
-                <>
-                  <SignInButton>
-                    <button className="w-full px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-gray-200 dark:border-gray-700">
-                      Sign In
-                    </button>
-                  </SignInButton>
-                  <SignUpButton>
-                    <button className="w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
-                      Get Started
-                    </button>
-                  </SignUpButton>
-                </>
-              )}
+            <div className="flex flex-col">
+              <span className="font-bold text-xl tracking-tight text-gray-800 dark:text-white">
+                IUT SIKS
+              </span>
             </div>
           </div>
+          {/* Nav links */}
+          <div className="flex-1 flex flex-col gap-2 px-4 mt-2">
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ${
+                  isActive(link.href)
+                    ? "bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow border border-emerald-200 dark:border-emerald-700"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+          {/* Divider */}
+          <div className="my-4 border-t border-gray-200 dark:border-gray-700 mx-4" />
+          {/* User actions */}
+          <div className="px-4 pb-8 flex flex-col gap-2">
+            {isSignedIn ? (
+              <>
+                <div className="px-2 py-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {user?.firstName || user?.username}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user?.emailAddresses[0]?.emailAddress}
+                  </p>
+                </div>
+                <Link
+                  href="/profile"
+                  className="block px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <SignOutButton redirectUrl={pathname}>
+                  <button
+                    className="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign Out
+                  </button>
+                </SignOutButton>
+              </>
+            ) : (
+              <>
+                <SignInButton>
+                  <button className="w-full px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-gray-200 dark:border-gray-700">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                    Get Started
+                  </button>
+                </SignUpButton>
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

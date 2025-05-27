@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const events = [
   {
@@ -80,69 +82,78 @@ export default function EventsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950 px-4 py-20 flex flex-col items-center">
-      <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center font-poppins">
-        Upcoming Events
-      </h1>
-      <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mb-14" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-6xl">
-        {events.map((event, idx) => (
-          <div
-            key={idx}
-            ref={(el) => {
-              cardsRef.current[idx] = el;
-            }}
-            data-idx={idx}
-            className={`relative group rounded-2xl bg-white/70 dark:bg-gray-900/70 border border-white/40 dark:border-gray-800/40 shadow-lg backdrop-blur-md p-8 flex flex-col justify-between transition-all duration-700 hover:scale-105 hover:shadow-2xl cursor-pointer ${
-              revealed[idx]
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
-            }`}
-            style={
-              parallax[idx]
-                ? {
-                    transform: `rotateY(${
-                      parallax[idx].x
-                    }deg) rotateX(${-parallax[idx].y}deg) scale(1.03)`,
-                  }
-                : undefined
-            }
-            onMouseMove={(e) => handleParallax(e, idx)}
-            onMouseLeave={() => resetParallax(idx)}
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
-                {event.title}
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                {new Date(event.date).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-              <p className="text-gray-700 dark:text-gray-200 mb-8 min-h-[64px]">
-                {event.description}
-              </p>
+    <AnimatePresence mode="wait">
+      <motion.main
+        key="events-page"
+        className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950 px-4 py-20 flex flex-col items-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+      >
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center font-poppins">
+          Upcoming Events
+        </h1>
+        <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mb-14" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-6xl">
+          {events.map((event, idx) => (
+            <div
+              key={idx}
+              ref={(el) => {
+                cardsRef.current[idx] = el;
+              }}
+              data-idx={idx}
+              className={`relative group rounded-2xl bg-white/70 dark:bg-gray-900/70 border border-white/40 dark:border-gray-800/40 shadow-lg backdrop-blur-md p-8 flex flex-col justify-between transition-all duration-700 hover:scale-105 hover:shadow-2xl cursor-pointer ${
+                revealed[idx]
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+              style={
+                parallax[idx]
+                  ? {
+                      transform: `rotateY(${
+                        parallax[idx].x
+                      }deg) rotateX(${-parallax[idx].y}deg) scale(1.03)`,
+                    }
+                  : undefined
+              }
+              onMouseMove={(e) => handleParallax(e, idx)}
+              onMouseLeave={() => resetParallax(idx)}
+            >
+              <div>
+                <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
+                  {event.title}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  {new Date(event.date).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+                <p className="text-gray-700 dark:text-gray-200 mb-8 min-h-[64px]">
+                  {event.description}
+                </p>
+              </div>
+              {event.available && (
+                <Link
+                  href={`/events/register/${event.route}`}
+                  className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  Register
+                </Link>
+              )}
+              {!event.available && (
+                <span className="inline-block mt-auto px-8 py-3 rounded-xl bg-gray-300 dark:bg-emerald-700 text-white-500 dark:text-grey-300 font-semibold shadow text-center cursor-not-allowed select-none">
+                  Register On Spot
+                </span>
+              )}
+              {/* Glass overlay on hover */}
+              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-300 bg-gradient-to-br from-emerald-200/40 to-blue-200/40 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-2xl" />
             </div>
-            {event.available && (
-              <Link
-                href={`/events/register/${event.route}`}
-                className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              >
-                Register
-              </Link>
-            )}
-            {!event.available && (
-              <span className="inline-block mt-auto px-8 py-3 rounded-xl bg-gray-300 dark:bg-emerald-700 text-white-500 dark:text-grey-300 font-semibold shadow text-center cursor-not-allowed select-none">
-                Register On Spot
-              </span>
-            )}
-            {/* Glass overlay on hover */}
-            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-300 bg-gradient-to-br from-emerald-200/40 to-blue-200/40 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-2xl" />
-          </div>
-        ))}
-      </div>
-    </main>
+          ))}
+        </div>
+      </motion.main>
+    </AnimatePresence>
   );
 }
