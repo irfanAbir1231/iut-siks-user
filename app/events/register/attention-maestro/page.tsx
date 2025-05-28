@@ -87,11 +87,7 @@ export default function AttentionMaestroRegistration() {
             </p>
             <div className="text-center">
               <ul className="font-mono text-xl text-[#97ffb0] space-y-2">
-                <li>1st: Ayesha Siddiqua</li>
-                <li>2nd: Mohammad Rahim</li>
-                <li>3rd: Tanvir Hasan</li>
-                <li>4th: Fatima Noor</li>
-                <li>5th: Zubair Ahmed</li>
+                <li>Comming soon</li>
               </ul>
             </div>
           </section>
