@@ -86,13 +86,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-gradient-to-r from-emerald-100/90 via-emerald-200/80 to-teal-100/90 dark:from-emerald-900/80 dark:via-emerald-950/80 dark:to-teal-900/80 backdrop-blur-lg shadow-lg"
-          : "bg-transparent"
-      }`}
-    >
+    <nav className="fixed w-full z-50 overflow-hidden bg-gradient-to-r from-emerald-100 via-emerald-200 to-teal-100 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-900 shadow-lg transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
@@ -319,20 +313,20 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden fixed inset-0 z-50 flex items-start justify-end transition-all duration-300 ease-in-out transform ${
+        className={`md:hidden fixed inset-0 z-50 flex items-start justify-end transition-all duration-300 ease-in-out transform overflow-hidden ${
           isMenuOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
         {/* Overlay */}
         <div
-          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-all duration-300 ${
+          className={`absolute inset-0 bg-black/30 transition-all duration-300 ${
             isMenuOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setIsMenuOpen(false)}
         />
         {/* Menu panel */}
         <div
-          className={`relative w-80 max-w-full h-full bg-gradient-to-br from-white/80 to-emerald-50 dark:from-gray-900/90 dark:to-gray-800/90 shadow-2xl rounded-l-2xl backdrop-blur-xl p-0 flex flex-col transition-all duration-300 ease-in-out transform ${
+          className={`relative w-80 max-w-full h-full bg-gradient-to-br from-white to-emerald-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl rounded-l-2xl p-0 flex flex-col transition-all duration-300 ease-in-out transform overflow-hidden ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
