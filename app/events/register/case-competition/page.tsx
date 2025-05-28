@@ -53,15 +53,18 @@ export default function CaseCompetitionRegistration() {
             </p>
           </section>
 
-          {/* Competition Phases Section */}
+          {/* How It Works Section */}
           <section className="bg-[#162235] shadow-xl rounded-3xl p-4 border border-[#2bff88]/20 inline-block w-fit">
             <h2 className="font-serif text-2xl md:text-3xl text-[#6fff8b] mb-2 text-center">
-              Competition Phases
+              How It Works
             </h2>
-            <ul className="font-mono text-lg text-[#ffffff] list-disc list-inside space-y-1">
-              <li>Phase 1: Document submission</li>
-              <li>Phase 2: Final round: Presentation & updated documents</li>
-            </ul>
+            <ol className="font-mono text-lg text-[#ffffff] list-decimal list-inside space-y-1">
+              <li>Form a team of up to 4 members (all-male or all-female).</li>
+              <li>Register your team using the form below.</li>
+              <li>Phase 1: Submit your solution document by the deadline.</li>
+              <li>Phase 2: If shortlisted, present your solution and updated documents in the final round.</li>
+              <li>Winners will be selected based on creativity, feasibility, and alignment with Islamic values.</li>
+            </ol>
             <div className="mt-4 text-center">
               <h2 className="font-serif text-2xl md:text-3xl text-[#6fff8b] mb-2 text-center">
                 Rulebook
@@ -77,7 +80,59 @@ export default function CaseCompetitionRegistration() {
             </div>
           </section>
 
-          {/* Deadline Section */}
+          {/* Winners Section */}
+          <section className="bg-[#162235] shadow-xl rounded-3xl p-8 border border-[#2bff88]/20">
+            <h2 className="font-serif text-2xl md:text-3xl text-[#ff811a] mb-4 text-center">
+              Winners
+            </h2>
+            <p className="font-mono text-lg text-[#b6e7c9] mb-4">
+              Congratulations to the top teams of the Case Competition!
+            </p>
+            <div className="text-center">
+              <ul className="font-mono text-xl text-white space-y-6">
+                <li>
+                  <span className="font-bold text-[#97ffb0] ">1st - Team Redemptiom</span><br />
+                  <b> Case Title - Salah-Mate: Shariah compliant travel kit for muslim travellers  </b>
+                  <br />
+                  Shaker Abdullah <br />
+                  Shahriar Zeem <br />
+                  Fazle Ahnaf Khan<br />
+                  Tahmid Islam Bhuiyan 
+                </li>
+                <li>
+                  <span className="font-bold text-[#97ffb0] ">2nd - Team Ababil</span><br />
+                  <b> Case Title - Branding with Barakah  </b>
+                  210061129<br />
+                  210012162<br />
+                  210012130<br />
+                  210012161
+                </li>
+                <li>
+                  <span className="font-bold text-[#97ffb0] ">3rd - Team Nahwa Al-Fitrah</span><br />
+                  <b> Case Title - A gender based values curriculumn  </b>
+                  200041132<br />
+                  200061102<br />
+                </li>
+                <li>
+                  <span className="font-bold text-[#97ffb0] ">4th - Team Lote Tree</span><br />
+                  <b> Case Title - Addiction: From Saqr to Qalb </b>
+                  220041228<br />
+                  220041241<br />
+                </li>
+                <li>
+                  <span className="font-bold text-[#97ffb0] ">5th - Team One Tech</span><br />
+                  <b> Case Title - One App : A Digital Solution for Muslim Ummah </b> 
+                  <br />
+                  Atik Shahriar<br />
+                  Muammar Tajwar<br />
+                  Sieam Shahriar<br />
+                  Amir Al Razin<br />
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Submit Now Section */}
           <section className="bg-[#162235] shadow-xl rounded-3xl p-8 border border-[#2bff88]/20">
             <h2 className="font-serif text-2xl md:text-3xl text-[#ff811a] mb-4 text-center">
               Submit Now
