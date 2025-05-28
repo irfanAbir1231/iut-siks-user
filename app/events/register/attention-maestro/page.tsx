@@ -7,9 +7,6 @@ export default function AttentionMaestroRegistration() {
           <h1 className="font-serif text-5xl md:text-6xl font-extrabold text-[#97ffb0] mb-2">
             Attention Maestro
           </h1>
-          <h2 className="font-mono text-2xl md:text-3xl text-[#6fff8b] mb-1">
-            Registration
-          </h2>
           <p className="font-sans text-lg text-[#b6e7c9]">
             Annual IUT Seerah Fest 1446
           </p>
