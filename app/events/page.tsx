@@ -34,7 +34,7 @@ const events = [
     description:
       "Participate in a fun and interactive event to test your focus and attention skills.",
     route: "attention-maestro",
-    available: false,
+    available: true,
   },
   {
     title: "Archery Competition",
@@ -139,12 +139,12 @@ export default function EventsPage() {
                   href={`/events/register/${event.route}`}
                   className="inline-block mt-auto px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow hover:shadow-xl hover:scale-105 transition-all duration-200 text-center focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 >
-                  Register
+                  Details
                 </Link>
               )}
               {!event.available && (
                 <span className="inline-block mt-auto px-8 py-3 rounded-xl bg-gray-300 dark:bg-emerald-700 text-white-500 dark:text-grey-300 font-semibold shadow text-center cursor-not-allowed select-none">
-                  Register On Spot
+                  Coming Soon
                 </span>
               )}
               {/* Glass overlay on hover */}
