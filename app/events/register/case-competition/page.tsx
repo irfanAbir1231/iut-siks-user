@@ -132,25 +132,6 @@ export default function CaseCompetitionRegistration() {
             </div>
           </section>
 
-          {/* Submit Now Section */}
-          <section className="bg-[#162235] shadow-xl rounded-3xl p-8 border border-[#2bff88]/20">
-            <h2 className="font-serif text-2xl md:text-3xl text-[#ff811a] mb-4 text-center">
-              Submit Now
-            </h2>
-            <p className="font-mono text-lg text-[#b6e7c9] mb-4 text-center">
-              Click the button below to access the submission form.
-            </p>
-            <div className="text-center">
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSfsqayt3JCta-IL4vf8Mj1Y9IwsxX9IgiYfuNOOCUzPZZJHVg/viewform"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-6 py-3 rounded-lg bg-[#ff811a] text-[#101c29] font-bold shadow hover:bg-[#00e36a] transition-all"
-              >
-                Register
-              </a>
-            </div>
-          </section>
         </div>
 
         {/* Contact Section */}
