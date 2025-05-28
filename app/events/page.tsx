@@ -34,7 +34,7 @@ const events = [
     description:
       "Participate in a fun and interactive event to test your focus and attention skills.",
     route: "attention-maestro",
-    available: true,
+    available: false,
   },
   {
     title: "Archery Competition",
