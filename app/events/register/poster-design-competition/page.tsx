@@ -49,9 +49,6 @@ export default function PosterDesignRegistration() {
               <li>AI-generated designs will be disqualified</li>
               <li>Registration Fee: Free</li>
             </ul>
-            <p className="font-serif text-lg text-[#b6e7c9] mt-2 text-center">
-              Submission Deadline: <strong className="text-[#ff811a]">26 May 2025</strong>
-            </p>
           </section>
 
           {/* How It Works Section */}
@@ -78,7 +75,7 @@ export default function PosterDesignRegistration() {
               Congratulations to the top participants of Poster Design Competition!
             </p>
             <div className="text-center">
-              <ul className="font-mono text-xl text-white space-y-2">
+              <ul className="font-mono text-xl text-whit space-y-2">
                 <li>1st: ID - 210012130</li>
                 <li>2nd: Mehedi Hasan Pranto</li>
                 <li>3rd: Atik Shahriar</li>

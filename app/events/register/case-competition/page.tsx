@@ -48,9 +48,6 @@ export default function CaseCompetitionRegistration() {
               <li>Gender Segregation: Only all-male or all-female teams</li>
               <li>Registration Fee: Free</li>
             </ul>
-            <p className="font-serif text-lg text-[#b6e7c9] mt-2 text-center">
-              Submission Deadline: <strong className="text-[#ff811a]">26 May 2025</strong>
-            </p>
           </section>
 
           {/* How It Works Section */}

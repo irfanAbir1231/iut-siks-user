@@ -10,7 +10,7 @@ const events = [
     description:
       "Test your knowledge about the life of Prophet Muhammad (PBUH) in this engaging quiz.",
     route: "seerah-quiz",
-    available: false,
+    available: true,
   },
   {
     title: "Poster design competition",
@@ -28,14 +28,15 @@ const events = [
     route: "case-competition",
     available: true,
   },
-  {
-    title: "Attention Maestro",
-    date: "2025-05-28",
-    description:
-      "Participate in a fun and interactive event to test your focus and attention skills.",
-    route: "attention-maestro",
-    available: false,
-  },
+
+  // {
+  //   title: "Attention Maestro",
+  //   date: "2025-05-28",
+  //   description:
+  //     "Participate in a fun and interactive event to test your focus and attention skills.",
+  //   route: "attention-maestro",
+  //   available: false,
+  // },
   {
     title: "Archery Competition",
     date: "2025-05-28",
