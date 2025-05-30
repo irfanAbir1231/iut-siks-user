@@ -82,6 +82,10 @@ export default function Navbar() {
         localStorage.theme = "dark";
         setIsDark(true);
       }
+      console.log(
+        "HTML class after toggle:",
+        document.documentElement.className
+      );
     }
   };
 

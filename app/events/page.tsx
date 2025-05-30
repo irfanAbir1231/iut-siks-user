@@ -29,14 +29,14 @@ const events = [
     available: true,
   },
 
-  // {
-  //   title: "Attention Maestro",
-  //   date: "2025-05-28",
-  //   description:
-  //     "Participate in a fun and interactive event to test your focus and attention skills.",
-  //   route: "attention-maestro",
-  //   available: false,
-  // },
+  {
+    title: "Attention Maestro",
+    date: "2025-05-28",
+    description:
+      "Participate in a fun and interactive event to test your focus and attention skills.",
+    route: "attention-maestro",
+    available: true,
+  },
   {
     title: "Archery Competition",
     date: "2025-05-28",

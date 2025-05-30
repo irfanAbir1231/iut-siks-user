@@ -1,19 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
-import '../lib/mongoose';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "../lib/mongoose";
 
 export const metadata: Metadata = {
   title: "IUT-SIKS | Society of Islamic Knowledge Seekers",
@@ -28,10 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="scroll-smooth dark">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-slate-50 via-blue-50/30 to-green-50/20 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950 min-h-screen`}
-        >
+      <html lang="en" className="scroll-smooth">
+        <body className="antialiased min-h-screen bg-white dark:bg-black">
           <div className="relative">
             {/* Animated background elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">

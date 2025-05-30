@@ -31,12 +31,12 @@ export default function AttentionMaestroRegistration() {
               .
             </p>
             <p className="font-serif text-base text-gray-700 dark:text-gray-200 mb-4 text-center italic">
-              Experience a unique event where your listening skills and attention to
-              detail are put to the test! Attend a live speech by a distinguished
-              speaker, then immediately participate in a quiz based on the talk.
-              Sharpen your focus, recall key points, and compete for exciting prizes.
-              This is your chance to engage, learn, and showcase your attentiveness in
-              a fun and interactive way!
+              Experience a unique event where your listening skills and
+              attention to detail are put to the test! Attend a live speech by a
+              distinguished speaker, then immediately participate in a quiz
+              based on the talk. Sharpen your focus, recall key points, and
+              compete for exciting prizes. This is your chance to engage, learn,
+              and showcase your attentiveness in a fun and interactive way!
             </p>
           </section>
           {/* Event Details Section */}
@@ -63,10 +63,10 @@ export default function AttentionMaestroRegistration() {
             </h2>
             <ul className="font-mono text-lg text-[#ffffff] list-decimal list-inside space-y-1">
               <li>Attend the live speech session.</li>
-              <li>Pay close attention to the speaker’s message.</li>
+              <li>Pay close attention to the speaker&apos;s message.</li>
               <li>
-                Right after the speech, participate in the quiz and showcase your
-                understanding.
+                Right after the speech, participate in the quiz and showcase
+                your understanding.
               </li>
             </ul>
             <p className="font-serif text-lg text-[#b6e7c9] mt-2 text-center">
@@ -84,7 +84,9 @@ export default function AttentionMaestroRegistration() {
             </p>
             <div className="text-center">
               <ul className="font-mono text-xl text-[#97ffb0] space-y-2">
-                <li>Comming soon</li>
+                <li>1st: 230042116</li>
+                <li>2nd: 230041206</li>
+                <li>3rd: 230011250</li>
               </ul>
             </div>
           </section>
