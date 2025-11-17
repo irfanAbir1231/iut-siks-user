@@ -3,22 +3,70 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  SignInButton,
-  SignUpButton,
-  useUser,
-  SignOutButton,
-} from "@clerk/nextjs";
+// Clerk imports are still commented out from the previous step
+// import {
+//   SignInButton,
+//   SignUpButton,
+//   useUser,
+//   SignOutButton,
+// } from "@clerk/nextjs";
 import Image from "next/image";
 
 export default function Navbar() {
-  const { isSignedIn, user } = useUser();
+  // Mocked user data from the previous step
+  const { isSignedIn, user } = {
+    isSignedIn: false, // <-- TOGGLE between true/false to test UI
+    user: {
+      id: "user_mock_id",
+      firstName: "Test",
+      username: "TestUser",
+      imageUrl: "/iut-siks-logo.jpg",
+      emailAddresses: [{ emailAddress: "test@example.com" }],
+    },
+  };
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  // --- START OF FIX ---
+
+  // Default the theme to light mode (isDark = false) on the server.
+  // The actual theme will be correctly set on the client in the useEffect hook below.
   const [isDark, setIsDark] = useState(false);
+
+  // This useEffect hook ONLY runs on the client-side, after the page is loaded
+  // in the browser. This is the correct way to access `window` or `localStorage`.
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (
+      theme === "dark" ||
+      (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
+    }
+  }, []); // The empty array [] guarantees this runs only once after the component mounts.
+
+  const toggleDarkMode = () => {
+    // This function is only called on button click, which can only happen in the browser.
+    if (document.documentElement.classList.contains("dark")) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light"); // Use the standard setItem method
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark"); // Use the standard setItem method
+      setIsDark(true);
+    }
+  };
+
+  // --- END OF FIX ---
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -53,41 +101,6 @@ export default function Navbar() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [profileDropdownOpen]);
-
-  // Dark mode toggle
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const theme = localStorage.theme;
-      if (
-        theme === "dark" ||
-        (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        document.documentElement.classList.add("dark");
-        setIsDark(true);
-      } else {
-        document.documentElement.classList.remove("dark");
-        setIsDark(false);
-      }
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    if (typeof window !== "undefined") {
-      if (document.documentElement.classList.contains("dark")) {
-        document.documentElement.classList.remove("dark");
-        localStorage.theme = "light";
-        setIsDark(false);
-      } else {
-        document.documentElement.classList.add("dark");
-        localStorage.theme = "dark";
-        setIsDark(true);
-      }
-      console.log(
-        "HTML class after toggle:",
-        document.documentElement.className
-      );
-    }
-  };
 
   return (
     <nav className="fixed w-full z-50 overflow-hidden bg-gradient-to-r from-emerald-100 via-emerald-200 to-teal-100 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-900 shadow-lg transition-all duration-300">
@@ -129,8 +142,8 @@ export default function Navbar() {
                       ? "text-emerald-600 bg-emerald-50"
                       : "text-emerald-100 bg-white/20"
                     : isScrolled
-                    ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
-                    : "text-white/90 hover:text-white hover:bg-white/20"
+                      ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
+                      : "text-white/90 hover:text-white hover:bg-white/20"
                 }`}
               >
                 {link.name}
@@ -238,39 +251,33 @@ export default function Navbar() {
                         </div>
                       </Link>
                       <div className="border-t border-gray-100 mt-1 pt-1">
-                        <SignOutButton redirectUrl={pathname}>
-                          <button
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                            onClick={() => setProfileDropdownOpen(false)}
-                          >
-                            <div className="flex items-center space-x-2">
-                              <span>🚪</span>
-                              <span>Sign Out</span>
-                            </div>
-                          </button>
-                        </SignOutButton>
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span>🚪</span>
+                            <span>Sign Out</span>
+                          </div>
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="flex items-center space-x-3">
-                  <SignInButton>
-                    <button
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        isScrolled
-                          ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
-                          : "text-white hover:bg-white/20"
-                      }`}
-                    >
-                      Sign In
-                    </button>
-                  </SignInButton>
-                  <SignUpButton>
-                    <button className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200">
-                      Get Started
-                    </button>
-                  </SignUpButton>
+                  <button
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      isScrolled
+                        ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
+                        : "text-white hover:bg-white/20"
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200">
+                    Get Started
+                  </button>
                 </div>
               )}
             </div>
@@ -409,27 +416,21 @@ export default function Navbar() {
                 >
                   My Profile
                 </Link>
-                <SignOutButton redirectUrl={pathname}>
-                  <button
-                    className="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign Out
-                  </button>
-                </SignOutButton>
+                <button
+                  className="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Out
+                </button>
               </>
             ) : (
               <>
-                <SignInButton>
-                  <button className="w-full px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-gray-200 dark:border-gray-700">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton>
-                  <button className="w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
-                    Get Started
-                  </button>
-                </SignUpButton>
+                <button className="w-full px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-gray-200 dark:border-gray-700">
+                  Sign In
+                </button>
+                <button className="w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                  Get Started
+                </button>
               </>
             )}
           </div>

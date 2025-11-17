@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { SignInButton } from "@clerk/nextjs";
-import Image from 'next/image';
+// import { SignInButton } from "@clerk/nextjs"; // MODIFIED: Commented out
+import Image from "next/image";
 
 // Add a simple count-up hook for stats
 function useCountUp(target: number, duration = 1200) {
@@ -72,7 +72,7 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.1, rootMargin: "50px" }
+      { threshold: 0.1, rootMargin: "50px" },
     );
 
     // Observe cards
@@ -187,22 +187,22 @@ export default function Home() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-                <SignInButton>
-                  <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
-                    <span>Join Our Community</span>
-                    <svg
-                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </SignInButton>
+                {/* <SignInButton> */}
+                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                  <span>Join Our Community</span>
+                  <svg
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {/* </SignInButton> */}
                 <Link
                   href="/events"
                   className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
@@ -385,8 +385,6 @@ export default function Home() {
         </div>
       </section>
 
-     
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -397,7 +395,7 @@ export default function Home() {
                 <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
                   <Image
                     src="/iut-siks-logo.jpg"
-                  alt="IUT SIKS Logo"
+                    alt="IUT SIKS Logo"
                     width={500}
                     height={300}
                     className="custom-class"

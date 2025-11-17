@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useUser, SignInButton } from "@clerk/nextjs";
+// import { useUser, SignInButton } from "@clerk/nextjs"; // MODIFIED: Commented out
 
 interface Blog {
   _id: string;
@@ -25,7 +25,16 @@ export default function BlogDetailsPage() {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(hardcodedComments);
   const [likes, setLikes] = useState(0);
-  const { isSignedIn, user } = useUser();
+
+  // MODIFIED: Mock user data
+  const { isSignedIn, user } = {
+    isSignedIn: true, // Set to true to always show the comment box
+    user: {
+      username: "MockUser",
+      firstName: "Mock",
+    },
+  };
+  // const { isSignedIn, user } = useUser(); // Original hook
 
   useEffect(() => {
     async function fetchBlog() {
@@ -53,7 +62,7 @@ export default function BlogDetailsPage() {
     e.preventDefault();
     if (comment.trim()) {
       const newComment = {
-        name: user?.username || user?.firstName || 'Anonymous',
+        name: user?.username || user?.firstName || "Anonymous",
         message: comment,
         blogId: blog?._id,
         date: new Date().toISOString(),
@@ -61,18 +70,18 @@ export default function BlogDetailsPage() {
 
       // Optimistically update the UI
       setComments((prev) => [newComment, ...prev]);
-      setComment('');
+      setComment("");
 
-      const response = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newComment),
       });
 
       if (!response.ok) {
         // Revert the optimistic update if the request fails
         setComments((prev) => prev.filter((c) => c !== newComment));
-        console.error('Failed to post comment');
+        console.error("Failed to post comment");
       }
     }
   }
@@ -110,7 +119,10 @@ export default function BlogDetailsPage() {
       <section className="bg-white rounded-2xl shadow border border-gray-200 max-w-2xl w-full p-8 mb-10">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Comments</h2>
         {isSignedIn ? (
-          <form onSubmit={handlePostComment} className="mb-6 flex flex-col gap-4">
+          <form
+            onSubmit={handlePostComment}
+            className="mb-6 flex flex-col gap-4"
+          >
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -126,11 +138,11 @@ export default function BlogDetailsPage() {
           </form>
         ) : (
           <div className="mb-6 text-center text-blue-700 font-semibold">
-            <SignInButton>
-              <button className="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">
-                Please log in to post a comment
-              </button>
-            </SignInButton>
+            {/* <SignInButton> */}
+            <button className="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition-colors duration-150">
+              Please log in to post a comment
+            </button>
+            {/* </SignInButton> */}
           </div>
         )}
         <ul className="flex flex-col gap-4">

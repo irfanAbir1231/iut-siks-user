@@ -1,18 +1,28 @@
 "use client";
-import { useUser, SignInButton } from "@clerk/nextjs";
+// import { useUser, SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
+
 export default function ProfilePage() {
-  const { isSignedIn, user } = useUser();
+  // Mocked user data to bypass authentication
+  const { isSignedIn, user } = {
+    isSignedIn: true,
+    user: {
+      fullName: "Mock User",
+      username: "mockuser",
+      imageUrl: "/iut-siks-logo.jpg", // Using a local asset as a placeholder
+      emailAddresses: [{ emailAddress: "mock@example.com" }],
+    },
+  };
 
   if (!isSignedIn) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <h2 className="text-2xl font-bold mb-4">You are not logged in</h2>
-        <SignInButton>
-          <button className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition text-lg">
-            Login
-          </button>
-        </SignInButton>
+        {/* <SignInButton> */}
+        <button className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow hover:bg-green-700 transition text-lg">
+          Login
+        </button>
+        {/* </SignInButton> */}
       </div>
     );
   }
@@ -37,7 +47,7 @@ export default function ProfilePage() {
           {user.emailAddresses?.[0]?.emailAddress}
         </p>
         <div className="mt-6 w-full flex flex-col gap-2">
-          {/* Add more profile info or actions here if needed */}
+          {/* You can add more profile information or actions here in the future */}
         </div>
       </div>
     </div>
