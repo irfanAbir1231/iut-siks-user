@@ -76,8 +76,6 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "Events", href: "/events" },
     // { name: "Blog", href: "/blogs" },
-    { name: "Prayer Times", href: "/prayer-times" },
-    { name: "Daily Reminders", href: "/reminders" },
   ];
 
   // Handle scroll effect

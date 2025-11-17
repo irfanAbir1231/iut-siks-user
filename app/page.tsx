@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 // import { SignInButton } from "@clerk/nextjs"; // MODIFIED: Commented out
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Add a simple count-up hook for stats
 function useCountUp(target: number, duration = 1200) {
@@ -25,11 +26,61 @@ function useCountUp(target: number, duration = 1200) {
   return count;
 }
 
+const slideshowImages = [
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410753/2dk2RRM2dZ8gKjXsrozapsD83FxL3Xbyyi5LFttAhrXxr16mCe4arfLJHzsuAJV54Whe4KoiMCwtnYk8d4G4gZbgjk9L25sfV5GgGB2nTgHQQhjDe18zzj5G9pZFTC2KTRbncJ1HnQUFhX5CDxJ4sQABMBMxgFJtBUxGPodXWW_koggpf.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410758/581784665_1270846551737901_5486929788072267009_n_ycpwcl.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410761/530396118_1189458623210028_922093440475259661_n_jfyx6i.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410762/536309837_1195526659269891_4099679753974654091_n_inyvxi.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410762/503563354_1132938862195338_6664611731588385766_n_t9j0yx.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410764/581015731_1269672285188661_5684656119063013537_n_u15iol.jpg",
+];
+
+// Data for new sections
+const prayerTimes = {
+  fajr: "04:50 AM",
+  dhuhr: "1:20 PM",
+  asr: "5:00 PM",
+  maghrib: "6:40 PM",
+  isha: "8:30 PM",
+  jummah: "1:30 PM",
+};
+
+const reminders = [
+  {
+    icon: "📖",
+    text: "Read Surah Mulk before sleeping",
+  },
+  {
+    icon: "🕌",
+    text: "Pray all Salat in congregation",
+  },
+  {
+    icon: "📘",
+    text: "Read Surah Kahf on Friday",
+  },
+  {
+    icon: "🤲",
+    text: "Make morning and evening adhkar",
+  },
+];
+
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
   const navCardsRef = useRef<HTMLDivElement>(null);
+  const prayerTimesRef = useRef<HTMLDivElement>(null); // New ref
+  const remindersRef = useRef<HTMLDivElement>(null); // New ref
   const featuresStatsRef = useRef<HTMLDivElement>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === slideshowImages.length - 1 ? 0 : prevIndex + 1,
+      );
+    }, 5000); // Change image every 5 seconds
+    return () => clearInterval(timer);
+  }, []);
 
   // Parallax state for nav cards
   const [parallax, setParallax] = useState<{
@@ -150,15 +201,26 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
-        {/* Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-300/20 dark:bg-emerald-800/20 rounded-full blur-3xl animate-float" />
-          <div
-            className="absolute bottom-40 right-10 w-96 h-96 bg-blue-300/20 dark:bg-blue-900/20 rounded-full blur-3xl animate-float"
-            style={{ animationDelay: "2s" }}
-          />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-emerald-100/30 to-blue-100/30 dark:from-emerald-900/20 dark:to-blue-900/20 rounded-full blur-3xl" />
-        </div>
+        {/* Background Slideshow */}
+        <AnimatePresence>
+          <motion.div
+            key={currentImageIndex}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+          >
+            <Image
+              src={slideshowImages[currentImageIndex]}
+              alt="Background"
+              layout="fill"
+              objectFit="cover"
+              className="brightness-50" // Darken image for readability
+              priority // Prioritize loading the hero image
+            />
+          </motion.div>
+        </AnimatePresence>
 
         <div className="flex-1 flex flex-col items-center justify-center pt-10 sm:pt-16">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -170,17 +232,15 @@ export default function Home() {
               }`}
             >
               {/* Main Heading */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10">
-                <span className="block text-gradient font-poppins">
-                  IUT SIKS
-                </span>
-                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-600 mt-2"></span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10 text-white drop-shadow-lg">
+                <span className="block font-poppins">IUT SIKS</span>
+                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-200 mt-2"></span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+              <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
                 Fostering spiritual growth and academic excellence at{" "}
-                <span className="font-semibold text-emerald-700">
+                <span className="font-medium text-emerald-300">
                   Islamic University of Technology
                 </span>
               </p>
@@ -223,8 +283,8 @@ export default function Home() {
                   cursor: "pointer",
                 }}
               >
-                <div className="w-8 h-14 border-2 border-emerald-400 rounded-full flex justify-center items-start">
-                  <div className="w-1 h-4 bg-emerald-400 rounded-full mt-2" />
+                <div className="w-8 h-14 border-2 border-white rounded-full flex justify-center items-start">
+                  <div className="w-1 h-4 bg-white rounded-full mt-2" />
                 </div>
               </button>
             </div>
@@ -310,7 +370,7 @@ export default function Home() {
           <button
             aria-label="Scroll to features and stats"
             onClick={() =>
-              featuresStatsRef.current?.scrollIntoView({ behavior: "smooth" })
+              prayerTimesRef.current?.scrollIntoView({ behavior: "smooth" })
             }
             className="flex justify-center animate-bounce focus:outline-none mx-auto mt-12 mb-0"
             style={{ background: "none", border: "none", cursor: "pointer" }}
@@ -329,6 +389,63 @@ export default function Home() {
               />
             </svg>
           </button>
+        </div>
+      </section>
+
+      {/* Prayer Times Section */}
+      <section
+        ref={prayerTimesRef}
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/50 dark:bg-emerald-950/50"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
+              Prayer Times
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {Object.entries(prayerTimes).map(([key, time]) => (
+              <div
+                key={key}
+                className="relative bg-white/70 dark:bg-gray-900/70 border border-white/40 dark:border-gray-800/40 shadow-lg backdrop-blur-md rounded-3xl p-6 flex justify-between items-center text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full"
+              >
+                <h3 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 capitalize">
+                  {key}
+                </h3>
+                <p className="text-xl font-mono text-gray-700 dark:text-gray-200">
+                  {time}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Daily Reminders Section */}
+      <section ref={remindersRef} className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
+              Daily Reminders
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+          </div>
+          <ul className="w-full max-w-2xl mx-auto flex flex-col gap-6">
+            {reminders.map((reminder, idx) => (
+              <li
+                key={idx}
+                className="flex items-center gap-6 p-6 rounded-2xl border shadow-lg backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/40 dark:border-gray-800/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              >
+                <span className="text-4xl text-emerald-700 dark:text-emerald-400">
+                  {reminder.icon}
+                </span>
+                <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {reminder.text}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
