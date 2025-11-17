@@ -68,17 +68,144 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
   const navCardsRef = useRef<HTMLDivElement>(null);
-  const prayerTimesRef = useRef<HTMLDivElement>(null); // New ref
-  const remindersRef = useRef<HTMLDivElement>(null); // New ref
+  const remindersRef = useRef<HTMLDivElement>(null);
   const featuresStatsRef = useRef<HTMLDivElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // --- START: Next Salat Time Logic ---
+  const [nextPrayer, setNextPrayer] = useState<{
+    name: string;
+    time: string;
+  } | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [isJamat, setIsJamat] = useState<boolean>(false);
+  const [upcomingPrayersMarquee, setUpcomingPrayersMarquee] =
+    useState<string>("");
+
+  useEffect(() => {
+    const parsePrayerTime = (timeStr: string): Date => {
+      const now = new Date();
+      const [time, modifier] = timeStr.split(" ");
+      const [hoursStr, minutesStr] = time.split(":");
+      let hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+
+      if (modifier === "PM" && hours < 12) {
+        hours += 12;
+      }
+      if (modifier === "AM" && hours === 12) {
+        hours = 0;
+      }
+      now.setHours(hours, minutes, 0, 0);
+      return now;
+    };
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const isFriday = now.getDay() === 5;
+
+      const dailyPrayerTimes = {
+        fajr: prayerTimes.fajr,
+        ...(isFriday
+          ? { jummah: prayerTimes.jummah }
+          : { dhuhr: prayerTimes.dhuhr }),
+        asr: prayerTimes.asr,
+        maghrib: prayerTimes.maghrib,
+        isha: prayerTimes.isha,
+      };
+
+      const prayerTimesData = Object.entries(dailyPrayerTimes).map(
+        ([name, time]) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          time: parsePrayerTime(time),
+          timeStr: time,
+        }),
+      );
+
+      let inJamat = false;
+      let currentPrayerName = "";
+
+      for (const prayer of prayerTimesData) {
+        const diff = now.getTime() - prayer.time.getTime();
+        if (diff > 0 && diff < 15 * 60 * 1000) {
+          inJamat = true;
+          currentPrayerName = prayer.name;
+          break;
+        }
+      }
+
+      if (inJamat) {
+        setIsJamat(true);
+        setNextPrayer({ name: currentPrayerName, time: "" });
+        setTimeRemaining("");
+        setUpcomingPrayersMarquee("");
+      } else {
+        setIsJamat(false);
+        let nextPrayerData = prayerTimesData.find((p) => p.time > now);
+
+        if (!nextPrayerData) {
+          const tomorrowFajrTime = parsePrayerTime(prayerTimes.fajr);
+          tomorrowFajrTime.setDate(tomorrowFajrTime.getDate() + 1);
+          nextPrayerData = {
+            name: "Fajr",
+            time: tomorrowFajrTime,
+            timeStr: prayerTimes.fajr,
+          };
+        }
+
+        if (nextPrayerData) {
+          const currentNextPrayer = {
+            name: nextPrayerData.name,
+            time: nextPrayerData.time.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+          setNextPrayer(currentNextPrayer);
+
+          const diffSeconds = Math.floor(
+            (nextPrayerData.time.getTime() - now.getTime()) / 1000,
+          );
+          const hours = Math.floor(diffSeconds / 3600);
+          const minutes = Math.floor((diffSeconds % 3600) / 60);
+          const seconds = diffSeconds % 60;
+          setTimeRemaining(
+            `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+              2,
+              "0",
+            )}:${String(seconds).padStart(2, "0")}`,
+          );
+
+          const prayerNamesInOrder = Object.keys(dailyPrayerTimes);
+          const nextPrayerIndex = prayerNamesInOrder.indexOf(
+            nextPrayerData.name.toLowerCase().replace("jummah", "dhuhr"),
+          );
+          const upcomingPrayerNames = prayerNamesInOrder.slice(
+            nextPrayerIndex + 1,
+          );
+          const marqueeText = upcomingPrayerNames
+            .map(
+              (name) =>
+                `${name.charAt(0).toUpperCase() + name.slice(1)} ${
+                  (dailyPrayerTimes as any)[name]
+                }`,
+            )
+            .join(" | ");
+          setUpcomingPrayersMarquee(marqueeText);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+  // --- END: Next Salat Time Logic ---
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         prevIndex === slideshowImages.length - 1 ? 0 : prevIndex + 1,
       );
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -111,10 +238,7 @@ export default function Home() {
   const counts = [count0, count1, count2, count3];
 
   useEffect(() => {
-    // Trigger initial animation
     setTimeout(() => setIsVisible(true), 100);
-
-    // Set up intersection observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -126,7 +250,6 @@ export default function Home() {
       { threshold: 0.1, rootMargin: "50px" },
     );
 
-    // Observe cards
     if (cardsRef.current) {
       const cards = cardsRef.current.querySelectorAll(".card-item");
       cards.forEach((card) => observer.observe(card));
@@ -145,15 +268,6 @@ export default function Home() {
       gradient: "from-emerald-500 to-teal-600",
       delay: "0ms",
     },
-    // {
-    //   title: "Blog",
-    //   href: "/blogs",
-    //   icon: "📝",
-    //   description: "Read insights, reflections, and knowledge articles",
-    //   color: "blue",
-    //   gradient: "from-blue-500 to-indigo-600",
-    //   delay: "100ms",
-    // },
     {
       title: "Prayer Times",
       href: "/prayer-times",
@@ -201,7 +315,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
-        {/* Background Slideshow */}
         <AnimatePresence>
           <motion.div
             key={currentImageIndex}
@@ -216,8 +329,8 @@ export default function Home() {
               alt="Background"
               layout="fill"
               objectFit="cover"
-              className="brightness-50" // Darken image for readability
-              priority // Prioritize loading the hero image
+              className="brightness-50"
+              priority
             />
           </motion.div>
         </AnimatePresence>
@@ -231,23 +344,17 @@ export default function Home() {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {/* Main Heading */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10 text-white drop-shadow-lg">
                 <span className="block font-poppins">IUT SIKS</span>
                 <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-200 mt-2"></span>
               </h1>
-
-              {/* Subtitle */}
               <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
                 Fostering spiritual growth and academic excellence at{" "}
                 <span className="font-medium text-emerald-300">
                   Islamic University of Technology
                 </span>
               </p>
-
-              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-                {/* <SignInButton> */}
                 <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
                   <span>Join Our Community</span>
                   <svg
@@ -262,7 +369,6 @@ export default function Home() {
                     />
                   </svg>
                 </button>
-                {/* </SignInButton> */}
                 <Link
                   href="/events"
                   className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
@@ -292,6 +398,49 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- NEW HORIZONTAL PRAYER TIME BAR --- */}
+      <section className="bg-emerald-800 text-white sticky top-16 z-40 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            <div className="text-sm md:text-base">
+              <AnimatePresence mode="wait">
+                {isJamat ? (
+                  <motion.div
+                    key="jamat"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="font-semibold text-emerald-300 animate-pulse"
+                  >
+                    {nextPrayer?.name} Jamat Ongoing
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="countdown"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center space-x-2 md:space-x-4"
+                  >
+                    <span className="hidden md:inline">Next Jamaat:</span>
+                    <span className="font-bold">{nextPrayer?.name}</span>
+                    <span className="text-gray-300">{nextPrayer?.time}</span>
+                    <span className="font-mono text-emerald-300 font-bold tracking-wider">
+                      {timeRemaining}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="hidden md:block text-sm text-gray-300 font-mono">
+              {upcomingPrayersMarquee}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Navigation Cards Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" ref={navCardsRef}>
         <div className="max-w-7xl mx-auto">
@@ -304,7 +453,7 @@ export default function Home() {
 
           <div
             ref={cardsRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10"
           >
             {navigationCards.map((card, index) => (
               <Link
@@ -360,7 +509,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                {/* Hover gradient overlay */}
                 <div
                   className={`absolute inset-0 opacity-0 group-hover:opacity-50 transition-opacity duration-500 bg-gradient-to-r ${card.gradient}`}
                 />
@@ -368,9 +516,9 @@ export default function Home() {
             ))}
           </div>
           <button
-            aria-label="Scroll to features and stats"
+            aria-label="Scroll to next section"
             onClick={() =>
-              prayerTimesRef.current?.scrollIntoView({ behavior: "smooth" })
+              remindersRef.current?.scrollIntoView({ behavior: "smooth" })
             }
             className="flex justify-center animate-bounce focus:outline-none mx-auto mt-12 mb-0"
             style={{ background: "none", border: "none", cursor: "pointer" }}
@@ -389,36 +537,6 @@ export default function Home() {
               />
             </svg>
           </button>
-        </div>
-      </section>
-
-      {/* Prayer Times Section */}
-      <section
-        ref={prayerTimesRef}
-        className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/50 dark:bg-emerald-950/50"
-      >
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
-              Prayer Times
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {Object.entries(prayerTimes).map(([key, time]) => (
-              <div
-                key={key}
-                className="relative bg-white/70 dark:bg-gray-900/70 border border-white/40 dark:border-gray-800/40 shadow-lg backdrop-blur-md rounded-3xl p-6 flex justify-between items-center text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full"
-              >
-                <h3 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 capitalize">
-                  {key}
-                </h3>
-                <p className="text-xl font-mono text-gray-700 dark:text-gray-200">
-                  {time}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -449,9 +567,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Move the stats and features grid into a new section below, with ref */}
+      {/* Stats and Features Section */}
       <section ref={featuresStatsRef} className="py-20 px-4 sm:px-6 lg:px-8">
-        {/* Stats Section */}
         <div className="py-10 bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-900 dark:to-emerald-800 rounded-3xl mb-16">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -477,7 +594,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-24 px-2">
           {features.map((feature, index) => (
             <div
@@ -506,7 +622,6 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
@@ -528,7 +643,6 @@ export default function Home() {
                 rooted in Islamic values and academic excellence.
               </p>
               <div className="flex space-x-4">
-                {/* Social Media Icons */}
                 <a
                   href="#"
                   className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
@@ -549,8 +663,6 @@ export default function Home() {
                 </a>
               </div>
             </div>
-
-            {/* Quick Links */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
@@ -566,8 +678,6 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-
-            {/* Contact */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Contact</h4>
               <div className="space-y-2 text-gray-400">
@@ -578,7 +688,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
             <p>
               &copy; {new Date().getFullYear()} IUT-SIKS. All rights reserved.
