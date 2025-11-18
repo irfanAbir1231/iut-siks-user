@@ -79,8 +79,6 @@ export default function Home() {
   } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isJamat, setIsJamat] = useState<boolean>(false);
-  const [upcomingPrayersMarquee, setUpcomingPrayersMarquee] =
-    useState<string>("");
 
   useEffect(() => {
     const parsePrayerTime = (timeStr: string): Date => {
@@ -94,6 +92,7 @@ export default function Home() {
         hours += 12;
       }
       if (modifier === "AM" && hours === 12) {
+        // Midnight case
         hours = 0;
       }
       now.setHours(hours, minutes, 0, 0);
@@ -118,13 +117,13 @@ export default function Home() {
         ([name, time]) => ({
           name: name.charAt(0).toUpperCase() + name.slice(1),
           time: parsePrayerTime(time),
-          timeStr: time,
         }),
       );
 
       let inJamat = false;
       let currentPrayerName = "";
 
+      // Check for jamat time first (within 15 mins after prayer time)
       for (const prayer of prayerTimesData) {
         const diff = now.getTime() - prayer.time.getTime();
         if (diff > 0 && diff < 15 * 60 * 1000) {
@@ -138,30 +137,26 @@ export default function Home() {
         setIsJamat(true);
         setNextPrayer({ name: currentPrayerName, time: "" });
         setTimeRemaining("");
-        setUpcomingPrayersMarquee("");
       } else {
         setIsJamat(false);
+        // Find the next prayer
         let nextPrayerData = prayerTimesData.find((p) => p.time > now);
 
+        // If no prayer is left for today, next is Fajr tomorrow
         if (!nextPrayerData) {
-          const tomorrowFajrTime = parsePrayerTime(prayerTimes.fajr);
-          tomorrowFajrTime.setDate(tomorrowFajrTime.getDate() + 1);
-          nextPrayerData = {
-            name: "Fajr",
-            time: tomorrowFajrTime,
-            timeStr: prayerTimes.fajr,
-          };
+          const tomorrowFajr = parsePrayerTime(prayerTimes.fajr);
+          tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
+          nextPrayerData = { name: "Fajr", time: tomorrowFajr };
         }
 
         if (nextPrayerData) {
-          const currentNextPrayer = {
+          setNextPrayer({
             name: nextPrayerData.name,
             time: nextPrayerData.time.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             }),
-          };
-          setNextPrayer(currentNextPrayer);
+          });
 
           const diffSeconds = Math.floor(
             (nextPrayerData.time.getTime() - now.getTime()) / 1000,
@@ -169,35 +164,20 @@ export default function Home() {
           const hours = Math.floor(diffSeconds / 3600);
           const minutes = Math.floor((diffSeconds % 3600) / 60);
           const seconds = diffSeconds % 60;
+
           setTimeRemaining(
             `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
               2,
               "0",
             )}:${String(seconds).padStart(2, "0")}`,
           );
-
-          const prayerNamesInOrder = Object.keys(dailyPrayerTimes);
-          const nextPrayerIndex = prayerNamesInOrder.indexOf(
-            nextPrayerData.name.toLowerCase().replace("jummah", "dhuhr"),
-          );
-          const upcomingPrayerNames = prayerNamesInOrder.slice(
-            nextPrayerIndex + 1,
-          );
-          const marqueeText = upcomingPrayerNames
-            .map(
-              (name) =>
-                `${name.charAt(0).toUpperCase() + name.slice(1)} ${
-                  (dailyPrayerTimes as any)[name]
-                }`,
-            )
-            .join(" | ");
-          setUpcomingPrayersMarquee(marqueeText);
         }
       }
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
+
   // --- END: Next Salat Time Logic ---
 
   useEffect(() => {
@@ -205,7 +185,7 @@ export default function Home() {
       setCurrentImageIndex((prevIndex) =>
         prevIndex === slideshowImages.length - 1 ? 0 : prevIndex + 1,
       );
-    }, 5000);
+    }, 5000); // Change image every 5 seconds
     return () => clearInterval(timer);
   }, []);
 
@@ -238,7 +218,10 @@ export default function Home() {
   const counts = [count0, count1, count2, count3];
 
   useEffect(() => {
+    // Trigger initial animation
     setTimeout(() => setIsVisible(true), 100);
+
+    // Set up intersection observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -250,6 +233,7 @@ export default function Home() {
       { threshold: 0.1, rootMargin: "50px" },
     );
 
+    // Observe cards
     if (cardsRef.current) {
       const cards = cardsRef.current.querySelectorAll(".card-item");
       cards.forEach((card) => observer.observe(card));
@@ -268,6 +252,15 @@ export default function Home() {
       gradient: "from-emerald-500 to-teal-600",
       delay: "0ms",
     },
+    // {
+    //   title: "Blog",
+    //   href: "/blogs",
+    //   icon: "📝",
+    //   description: "Read insights, reflections, and knowledge articles",
+    //   color: "blue",
+    //   gradient: "from-blue-500 to-indigo-600",
+    //   delay: "100ms",
+    // },
     {
       title: "Prayer Times",
       href: "/prayer-times",
@@ -311,95 +304,17 @@ export default function Home() {
     },
   ];
 
+  const upcomingPrayersMarquee = Object.entries(prayerTimes)
+    .map(
+      ([name, time]) =>
+        `${name.charAt(0).toUpperCase() + name.slice(1)}: ${time}`,
+    )
+    .join("  •  ");
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
-        <AnimatePresence>
-          <motion.div
-            key={currentImageIndex}
-            className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          >
-            <Image
-              src={slideshowImages[currentImageIndex]}
-              alt="Background"
-              layout="fill"
-              objectFit="cover"
-              className="brightness-50"
-              priority
-            />
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="flex-1 flex flex-col items-center justify-center pt-10 sm:pt-16">
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className={`transition-all duration-1000 ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10 text-white drop-shadow-lg">
-                <span className="block font-poppins">IUT SIKS</span>
-                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-200 mt-2"></span>
-              </h1>
-              <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
-                Fostering spiritual growth and academic excellence at{" "}
-                <span className="font-medium text-emerald-300">
-                  Islamic University of Technology
-                </span>
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
-                  <span>Join Our Community</span>
-                  <svg
-                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <Link
-                  href="/events"
-                  className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  Explore Events
-                </Link>
-              </div>
-              <div style={{ height: "80px" }} />
-              <button
-                aria-label="Scroll to next section"
-                onClick={() =>
-                  navCardsRef.current?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="flex justify-center animate-bounce focus:outline-none mx-auto"
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <div className="w-8 h-14 border-2 border-white rounded-full flex justify-center items-start">
-                  <div className="w-1 h-4 bg-white rounded-full mt-2" />
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* --- NEW HORIZONTAL PRAYER TIME BAR --- */}
-      <section className="bg-emerald-800 text-white sticky top-16 z-40 shadow-lg">
+      <section className="bg-emerald-800 bg-opacity-80 backdrop-blur-md text-white sticky top-16 z-40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <div className="text-sm md:text-base">
@@ -441,6 +356,177 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
+        {/* Background Slideshow */}
+        <AnimatePresence>
+          <motion.div
+            key={currentImageIndex}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+          >
+            <Image
+              src={slideshowImages[currentImageIndex]}
+              alt="Background"
+              layout="fill"
+              objectFit="cover"
+              className="brightness-50" // Darken image for readability
+              priority // Prioritize loading the hero image
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="flex-1 flex flex-col items-center justify-center pt-10 sm:pt-16">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div
+              className={`transition-all duration-1000 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              {/* Main Heading */}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10 text-white drop-shadow-lg">
+                <span className="block font-poppins">IUT SIKS</span>
+                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-200 mt-2"></span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
+                Fostering spiritual growth and academic excellence at{" "}
+                <span className="font-medium text-emerald-300">
+                  Islamic University of Technology
+                </span>
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+                {/* <SignInButton> */}
+                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                  <span>Join Our Community</span>
+                  <svg
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {/* </SignInButton> */}
+                <Link
+                  href="/events"
+                  className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  Explore Events
+                </Link>
+              </div>
+              <div style={{ height: "80px" }} />
+              <button
+                aria-label="Scroll to next section"
+                onClick={() =>
+                  navCardsRef.current?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="flex justify-center animate-bounce focus:outline-none mx-auto"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <div className="w-8 h-14 border-2 border-white rounded-full flex justify-center items-start">
+                  <div className="w-1 h-4 bg-white rounded-full mt-2" />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- NEW PRAYER TIME SECTION --- */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/50 dark:bg-emerald-950/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
+              IUT Mosque Jamaat Times
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl max-w-md mx-auto border border-gray-200 dark:border-gray-700 shadow-lg"
+          >
+            <AnimatePresence mode="wait">
+              {isJamat ? (
+                <motion.div
+                  key="jamat"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-center"
+                >
+                  <p className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300 animate-pulse">
+                    {nextPrayer?.name} Jamat Ongoing
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-300 text-md mt-1">
+                    Join the congregation
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="countdown"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-center"
+                >
+                  <p className="text-lg text-gray-700 dark:text-gray-200">
+                    Next Prayer:{" "}
+                    <span className="font-bold text-gray-900 dark:text-white">
+                      {nextPrayer?.name}
+                    </span>{" "}
+                    at{" "}
+                    <span className="font-bold text-gray-900 dark:text-white">
+                      {nextPrayer?.time}
+                    </span>
+                  </p>
+                  <p className="text-5xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-wider mt-2">
+                    {timeRemaining}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
+            {Object.entries(prayerTimes).map(([key, time]) => (
+              <div
+                key={key}
+                className="text-center p-4 bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-md border border-gray-200/50 dark:border-gray-800/50 transition-transform hover:scale-105"
+              >
+                <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400 capitalize">
+                  {key}
+                </h3>
+                <p className="text-md font-mono text-gray-700 dark:text-gray-200 mt-1">
+                  {time}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Navigation Cards Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" ref={navCardsRef}>
         <div className="max-w-7xl mx-auto">
@@ -453,7 +539,7 @@ export default function Home() {
 
           <div
             ref={cardsRef}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
           >
             {navigationCards.map((card, index) => (
               <Link
@@ -509,6 +595,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+                {/* Hover gradient overlay */}
                 <div
                   className={`absolute inset-0 opacity-0 group-hover:opacity-50 transition-opacity duration-500 bg-gradient-to-r ${card.gradient}`}
                 />
@@ -567,8 +654,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats and Features Section */}
+      {/* Move the stats and features grid into a new section below, with ref */}
       <section ref={featuresStatsRef} className="py-20 px-4 sm:px-6 lg:px-8">
+        {/* Stats Section */}
         <div className="py-10 bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-900 dark:to-emerald-800 rounded-3xl mb-16">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -594,6 +682,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-24 px-2">
           {features.map((feature, index) => (
             <div
@@ -622,6 +711,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
@@ -643,6 +733,7 @@ export default function Home() {
                 rooted in Islamic values and academic excellence.
               </p>
               <div className="flex space-x-4">
+                {/* Social Media Icons */}
                 <a
                   href="#"
                   className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
@@ -663,6 +754,8 @@ export default function Home() {
                 </a>
               </div>
             </div>
+
+            {/* Quick Links */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
@@ -678,6 +771,8 @@ export default function Home() {
                 ))}
               </ul>
             </div>
+
+            {/* Contact */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Contact</h4>
               <div className="space-y-2 text-gray-400">
@@ -688,6 +783,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
             <p>
               &copy; {new Date().getFullYear()} IUT-SIKS. All rights reserved.
