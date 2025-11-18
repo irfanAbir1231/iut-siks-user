@@ -75,6 +75,7 @@ export default function Navbar() {
   const navigationLinks = [
     { name: "Home", href: "/" },
     { name: "Events", href: "/events" },
+    { name: "Reminders", href: "/reminders" },
     // { name: "Blog", href: "/blogs" },
   ];
 

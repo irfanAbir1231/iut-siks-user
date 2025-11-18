@@ -38,7 +38,7 @@ export default function RemindersPage() {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
     cardsRef.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
