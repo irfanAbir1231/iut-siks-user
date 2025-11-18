@@ -561,6 +561,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Daily Reminders Section */}
+      <section ref={remindersRef} className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
+              Daily Reminders
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+          </div>
+          <ul className="w-full max-w-2xl mx-auto flex flex-col gap-6">
+            {reminders.map((reminder, idx) => (
+              <li
+                key={idx}
+                className="flex items-center gap-6 p-6 rounded-2xl border shadow-lg backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/40 dark:border-gray-800/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              >
+                <span className="text-4xl text-emerald-700 dark:text-emerald-400">
+                  {reminder.icon}
+                </span>
+                <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {reminder.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* Navigation Cards Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" ref={navCardsRef}>
         <div className="max-w-7xl mx-auto">
@@ -658,33 +685,6 @@ export default function Home() {
               />
             </svg>
           </button>
-        </div>
-      </section>
-
-      {/* Daily Reminders Section */}
-      <section ref={remindersRef} className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
-              Daily Reminders
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
-          </div>
-          <ul className="w-full max-w-2xl mx-auto flex flex-col gap-6">
-            {reminders.map((reminder, idx) => (
-              <li
-                key={idx}
-                className="flex items-center gap-6 p-6 rounded-2xl border shadow-lg backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/40 dark:border-gray-800/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-              >
-                <span className="text-4xl text-emerald-700 dark:text-emerald-400">
-                  {reminder.icon}
-                </span>
-                <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                  {reminder.text}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
