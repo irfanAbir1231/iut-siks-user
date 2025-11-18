@@ -38,7 +38,7 @@ const slideshowImages = [
 // Data for new sections
 const prayerTimes = {
   fajr: "04:50 AM",
-  dhuhr: "1:20 PM",
+  dhuhr: "1:30 PM",
   asr: "5:00 PM",
   maghrib: "6:40 PM",
   isha: "8:30 PM",
@@ -71,6 +71,7 @@ export default function Home() {
   const remindersRef = useRef<HTMLDivElement>(null);
   const featuresStatsRef = useRef<HTMLDivElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
 
   // --- START: Next Salat Time Logic ---
   const [nextPrayer, setNextPrayer] = useState<{
@@ -79,6 +80,23 @@ export default function Home() {
   } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isJamat, setIsJamat] = useState<boolean>(false);
+
+  // --- START: Prayer Bar Visibility Logic ---
+  const [isPrayerBarVisible, setIsPrayerBarVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        // Hide the bar after scrolling 80% of the hero section's height
+        const heroHeight = heroRef.current.offsetHeight;
+        setIsPrayerBarVisible(window.scrollY < heroHeight * 0.8);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  // --- END: Prayer Bar Visibility Logic ---
 
   useEffect(() => {
     const parsePrayerTime = (timeStr: string): Date => {
@@ -314,50 +332,65 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
       {/* --- NEW HORIZONTAL PRAYER TIME BAR --- */}
-      <section className="bg-emerald-800 bg-opacity-80 backdrop-blur-md text-white sticky top-16 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <div className="text-sm md:text-base">
-              <AnimatePresence mode="wait">
-                {isJamat ? (
-                  <motion.div
-                    key="jamat"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="font-semibold text-emerald-300 animate-pulse"
-                  >
-                    {nextPrayer?.name} Jamat Ongoing
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="countdown"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-center space-x-2 md:space-x-4"
-                  >
-                    <span className="hidden md:inline">Next Jamaat:</span>
-                    <span className="font-bold">{nextPrayer?.name}</span>
-                    <span className="text-gray-300">{nextPrayer?.time}</span>
-                    <span className="font-mono text-emerald-300 font-bold tracking-wider">
-                      {timeRemaining}
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+      <AnimatePresence>
+        {isPrayerBarVisible && (
+          <motion.section
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="sticky top-16 z-40 bg-black/30 backdrop-blur-lg text-white shadow-lg"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-14">
+                <div className="text-sm md:text-base">
+                  <AnimatePresence mode="wait">
+                    {isJamat ? (
+                      <motion.div
+                        key="jamat"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="font-semibold text-emerald-300 animate-pulse"
+                      >
+                        {nextPrayer?.name} Jamat Ongoing
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="countdown"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex items-center space-x-2 md:space-x-4"
+                      >
+                        <span className="hidden md:inline">Next Jamaat:</span>
+                        <span className="font-bold">{nextPrayer?.name}</span>
+                        <span className="text-gray-300">
+                          {nextPrayer?.time}
+                        </span>
+                        <span className="font-mono text-emerald-300 font-bold tracking-wider">
+                          {timeRemaining}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="hidden md:block text-sm text-gray-300 font-mono">
+                  {upcomingPrayersMarquee}
+                </div>
+              </div>
             </div>
-            <div className="hidden md:block text-sm text-gray-300 font-mono">
-              {upcomingPrayersMarquee}
-            </div>
-          </div>
-        </div>
-      </section>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20">
+      <section
+        ref={heroRef}
+        className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20"
+      >
         {/* Background Slideshow */}
         <AnimatePresence>
           <motion.div
@@ -376,6 +409,7 @@ export default function Home() {
               className="brightness-50" // Darken image for readability
               priority // Prioritize loading the hero image
             />
+            <div className="absolute inset-0 bg-black/10" />
           </motion.div>
         </AnimatePresence>
 
