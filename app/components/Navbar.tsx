@@ -77,6 +77,7 @@ export default function Navbar() {
     { name: "About", href: "/about" },
     { name: "Events", href: "/events" },
     { name: "Reminders", href: "/reminders" },
+    { name: "Upcoming", href: "/upcoming" },
     // { name: "Blog", href: "/blogs" },
   ];
 
