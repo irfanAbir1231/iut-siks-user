@@ -46,11 +46,11 @@ const slideshowImages = [
 
 // Data for new sections
 const prayerTimes = {
-  fajr: "04:50 AM",
-  dhuhr: "1:30 PM",
-  asr: "5:00 PM",
-  maghrib: "6:40 PM",
-  isha: "8:30 PM",
+  fajr: "05:50 AM",
+  dhuhr: "1:20 PM",
+  asr: "4:00 PM",
+  maghrib: "5:20 PM",
+  isha: "7:45 PM",
   jummah: "1:30 PM",
 };
 

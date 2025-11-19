@@ -60,11 +60,11 @@ const parsePrayerTime = (timeStr: string): Date => {
 
 export default function PrayerTimesPage() {
   const [prayerTimes] = useState<PrayerTimes>({
-    fajr: "04:50 AM",
+    fajr: "05:50 AM",
     dhuhr: "1:20 PM",
-    asr: "5:00 PM",
-    maghrib: "6:40 PM",
-    isha: "8:30 PM",
+    asr: "4:00 PM",
+    maghrib: "5:20 PM",
+    isha: "7:45 PM",
     jummah: "1:30 PM",
   });
   const [currentTime, setCurrentTime] = useState("");
