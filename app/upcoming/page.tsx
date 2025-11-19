@@ -28,12 +28,28 @@ const upcomingFeatures = [
     color: "purple",
   },
   {
-    title: "Digital Dhikr Companion",
+    title: "Live Islamic Events",
     description:
-      "An integrated Tasbeeh counter and guided morning/evening Adhkar interface to help you keep your tongue moist with the remembrance of Allah.",
-    icon: "📿",
+      "Real-time updates of halaqas, lectures, SIKS Book Club meetups, and other on-campus Islamic programs — never miss a gathering again.",
+    icon: "📅",
+    status: "In Progress",
+    color: "emerald",
+  },
+  {
+    title: "Halaqa Livestream",
+    description:
+      "Watch halaqas and lectures live when you can’t attend physically. Includes reminders, upcoming session info, and archived recordings.",
+    icon: "🎥",
     status: "Planned",
-    color: "amber",
+    color: "indigo",
+  },
+  {
+    title: "Community Hub",
+    description:
+      "A dedicated section for students to share reflections, discuss Islamic topics, form study circles, and build a stronger SIKS community.",
+    icon: "🌙",
+    status: "Concept",
+    color: "violet",
   },
   {
     title: "Ask the Scholar",
@@ -42,14 +58,6 @@ const upcomingFeatures = [
     icon: "❓",
     status: "Concept",
     color: "teal",
-  },
-  {
-    title: "Campus Halal Spots",
-    description:
-      "A curated guide to halal food spots around IUT and Gazipur, reviewed by the community for hygiene and halal compliance.",
-    icon: "🍔",
-    status: "Concept",
-    color: "rose",
   },
 ];
 
