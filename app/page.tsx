@@ -429,7 +429,10 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
                 {/* <SignInButton> */}
-                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                <Link
+                  href="https://web.facebook.com/iutsiks"
+                  className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
+                >
                   <span>Join Our Community</span>
                   <svg
                     className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -442,7 +445,7 @@ export default function Home() {
                       clipRule="evenodd"
                     />
                   </svg>
-                </button>
+                </Link>
                 {/* </SignInButton> */}
                 <Link
                   href="/events"
