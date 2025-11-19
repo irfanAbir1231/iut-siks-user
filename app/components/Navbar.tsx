@@ -3,19 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-// Clerk imports are still commented out from the previous step
-// import {
-//   SignInButton,
-//   SignUpButton,
-//   useUser,
-//   SignOutButton,
-// } from "@clerk/nextjs";
 import Image from "next/image";
 
 export default function Navbar() {
-  // Mocked user data from the previous step
+  // Mocked user data
   const { isSignedIn, user } = {
-    isSignedIn: false, // <-- TOGGLE between true/false to test UI
+    isSignedIn: false, // Set to true to see the Profile dropdown
     user: {
       id: "user_mock_id",
       firstName: "Test",
@@ -31,14 +24,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-  // --- START OF FIX ---
-
-  // Default the theme to light mode (isDark = false) on the server.
-  // The actual theme will be correctly set on the client in the useEffect hook below.
+  // Theme logic
   const [isDark, setIsDark] = useState(false);
 
-  // This useEffect hook ONLY runs on the client-side, after the page is loaded
-  // in the browser. This is the correct way to access `window` or `localStorage`.
   useEffect(() => {
     const theme = localStorage.getItem("theme");
     if (
@@ -51,22 +39,19 @@ export default function Navbar() {
       document.documentElement.classList.remove("dark");
       setIsDark(false);
     }
-  }, []); // The empty array [] guarantees this runs only once after the component mounts.
+  }, []);
 
   const toggleDarkMode = () => {
-    // This function is only called on button click, which can only happen in the browser.
     if (document.documentElement.classList.contains("dark")) {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light"); // Use the standard setItem method
+      localStorage.setItem("theme", "light");
       setIsDark(false);
     } else {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark"); // Use the standard setItem method
+      localStorage.setItem("theme", "dark");
       setIsDark(true);
     }
   };
-
-  // --- END OF FIX ---
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -78,7 +63,6 @@ export default function Navbar() {
     { name: "Events", href: "/events" },
     { name: "Reminders", href: "/reminders" },
     { name: "Upcoming", href: "/upcoming" },
-    // { name: "Blog", href: "/blogs" },
   ];
 
   // Handle scroll effect
@@ -154,12 +138,12 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* Auth Buttons/Profile */}
+            {/* Auth Buttons/Profile & Theme Toggle */}
             <div className="flex items-center ml-6 space-x-3">
               {/* Dark mode toggle */}
               <button
                 onClick={toggleDarkMode}
-                className={`ml-2 p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                className={`p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
                   isScrolled
                     ? "bg-gray-100 dark:bg-gray-800"
                     : "bg-white/20 dark:bg-gray-800/60"
@@ -198,7 +182,9 @@ export default function Navbar() {
                   </svg>
                 )}
               </button>
-              {isSignedIn ? (
+
+              {/* Only show Profile if signed in (Sign In buttons removed) */}
+              {isSignedIn && (
                 <div className="relative" ref={menuRef}>
                   <button
                     className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -264,21 +250,6 @@ export default function Navbar() {
                       </div>
                     </div>
                   )}
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <button
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isScrolled
-                        ? "text-gray-900 dark:text-white hover:text-emerald-600 hover:bg-emerald-50"
-                        : "text-white hover:bg-white/20"
-                    }`}
-                  >
-                    Sign In
-                  </button>
-                  <button className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200">
-                    Get Started
-                  </button>
                 </div>
               )}
             </div>
@@ -400,7 +371,8 @@ export default function Navbar() {
           <div className="my-4 border-t border-gray-200 dark:border-gray-700 mx-4" />
           {/* User actions */}
           <div className="px-4 pb-8 flex flex-col gap-2">
-            {isSignedIn ? (
+            {/* Only show profile options if signed in */}
+            {isSignedIn && (
               <>
                 <div className="px-2 py-1">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -422,15 +394,6 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="w-full px-4 py-3 rounded-xl text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-800 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-gray-200 dark:border-gray-700">
-                  Sign In
-                </button>
-                <button className="w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
-                  Get Started
                 </button>
               </>
             )}
