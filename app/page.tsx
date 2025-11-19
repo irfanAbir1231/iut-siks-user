@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-// import { SignInButton } from "@clerk/nextjs"; // MODIFIED: Commented out
+// import { SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-// 1. Import the font
 import { Aref_Ruqaa } from "next/font/google";
 
-// 2. Configure the font
+// Configure the font
 const arefRuqaa = Aref_Ruqaa({
   weight: ["400", "700"],
   subsets: ["latin"],
   display: "swap",
 });
 
-// Add a simple count-up hook for stats
+// Count-up hook
 function useCountUp(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -41,51 +40,84 @@ const slideshowImages = [
   "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410761/530396118_1189458623210028_922093440475259661_n_jfyx6i.jpg",
   "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410762/536309837_1195526659269891_4099679753974654091_n_inyvxi.jpg",
   "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410762/503563354_1132938862195338_6664611731588385766_n_t9j0yx.jpg",
-  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763410764/581015731_1269672285188661_5684656119063013537_n_u15iol.jpg",
+  "https://res.cloudinary.com/dah92ac5b/image/upload/v1763484633/6d9b8969-66e0-4060-9ca6-204a2f48cd86.png",
 ];
 
-// Data for new sections
+// Gallery Data (Simulating images from different pages)
+const galleryImages = [
+  {
+    src: slideshowImages[0],
+    category: "Community",
+    title: "Annual Gathering",
+    size: "large", // Spans 2 columns
+  },
+  {
+    src: slideshowImages[1],
+    category: "Prayers",
+    title: "Islamic Congregation",
+    size: "small",
+  },
+  {
+    src: slideshowImages[2],
+    category: "Campus Life",
+    title: "Cricket Tournament",
+    size: "small",
+  },
+  {
+    src: slideshowImages[3],
+    category: "Activities",
+    title: "Fundraiser For Palestine",
+    size: "large",
+  },
+  {
+    src: slideshowImages[4],
+    category: "Education",
+    title: "Islamic Lecture",
+    size: "large",
+  },
+  {
+    src: slideshowImages[5],
+    category: "Outreach",
+    title: "Charity Drive",
+    size: "small",
+  },
+];
+
 const prayerTimes = {
-  fajr: "05:50 AM",
-  dhuhr: "1:20 PM",
-  asr: "4:00 PM",
-  maghrib: "5:20 PM",
-  isha: "7:45 PM",
+  fajr: "04:50 AM",
+  dhuhr: "1:30 PM",
+  asr: "5:00 PM",
+  maghrib: "6:40 PM",
+  isha: "8:30 PM",
   jummah: "1:30 PM",
 };
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
-  const cardsRef = useRef<HTMLDivElement>(null);
-  const navCardsRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
   const featuresStatsRef = useRef<HTMLDivElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
 
-  // --- START: Next Salat Time Logic ---
+  // --- Next Salat Time Logic ---
   const [nextPrayer, setNextPrayer] = useState<{
     name: string;
     time: string;
   } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isJamat, setIsJamat] = useState<boolean>(false);
-
-  // --- START: Prayer Bar Visibility Logic ---
   const [isPrayerBarVisible, setIsPrayerBarVisible] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
       if (heroRef.current) {
-        // Hide the bar after scrolling 80% of the hero section's height
         const heroHeight = heroRef.current.offsetHeight;
         setIsPrayerBarVisible(window.scrollY < heroHeight * 0.8);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  // --- END: Prayer Bar Visibility Logic ---
 
   useEffect(() => {
     const parsePrayerTime = (timeStr: string): Date => {
@@ -95,13 +127,8 @@ export default function Home() {
       let hours = parseInt(hoursStr, 10);
       const minutes = parseInt(minutesStr, 10);
 
-      if (modifier === "PM" && hours < 12) {
-        hours += 12;
-      }
-      if (modifier === "AM" && hours === 12) {
-        // Midnight case
-        hours = 0;
-      }
+      if (modifier === "PM" && hours < 12) hours += 12;
+      if (modifier === "AM" && hours === 12) hours = 0;
       now.setHours(hours, minutes, 0, 0);
       return now;
     };
@@ -130,7 +157,6 @@ export default function Home() {
       let inJamat = false;
       let currentPrayerName = "";
 
-      // Check for jamat time first (within 15 mins after prayer time)
       for (const prayer of prayerTimesData) {
         const diff = now.getTime() - prayer.time.getTime();
         if (diff > 0 && diff < 15 * 60 * 1000) {
@@ -146,10 +172,8 @@ export default function Home() {
         setTimeRemaining("");
       } else {
         setIsJamat(false);
-        // Find the next prayer
         let nextPrayerData = prayerTimesData.find((p) => p.time > now);
 
-        // If no prayer is left for today, next is Fajr tomorrow
         if (!nextPrayerData) {
           const tomorrowFajr = parsePrayerTime(prayerTimes.fajr);
           tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
@@ -185,33 +209,16 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // --- END: Next Salat Time Logic ---
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         prevIndex === slideshowImages.length - 1 ? 0 : prevIndex + 1,
       );
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
-  // Parallax state for nav cards
-  const [parallax, setParallax] = useState<{
-    [key: number]: { x: number; y: number };
-  }>({});
-  const handleParallax = (e: React.MouseEvent, idx: number) => {
-    const card = e.currentTarget as HTMLDivElement;
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
-    setParallax((prev) => ({ ...prev, [idx]: { x, y } }));
-  };
-  const resetParallax = (idx: number) => {
-    setParallax((prev) => ({ ...prev, [idx]: { x: 0, y: 0 } }));
-  };
-
-  // Stats data and animated counts
+  // Stats data
   const stats = [
     { number: 500, label: "Members", suffix: "+" },
     { number: 20, label: "Events", suffix: "+" },
@@ -225,68 +232,8 @@ export default function Home() {
   const counts = [count0, count1, count2, count3];
 
   useEffect(() => {
-    // Trigger initial animation
     setTimeout(() => setIsVisible(true), 100);
-
-    // Set up intersection observer for scroll animations
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("revealed");
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "50px" },
-    );
-
-    // Observe cards
-    if (cardsRef.current) {
-      const cards = cardsRef.current.querySelectorAll(".card-item");
-      cards.forEach((card) => observer.observe(card));
-    }
-
-    return () => observer.disconnect();
   }, []);
-
-  const navigationCards = [
-    {
-      title: "Events",
-      href: "/events",
-      icon: "📅",
-      description: "Discover upcoming events and community gatherings",
-      color: "emerald",
-      gradient: "from-emerald-500 to-teal-600",
-      delay: "0ms",
-    },
-    // {
-    //   title: "Blog",
-    //   href: "/blogs",
-    //   icon: "📝",
-    //   description: "Read insights, reflections, and knowledge articles",
-    //   color: "blue",
-    //   gradient: "from-blue-500 to-indigo-600",
-    //   delay: "100ms",
-    // },
-    {
-      title: "Prayer Times",
-      href: "/prayer-times",
-      icon: "🕌",
-      description: "Stay updated with accurate daily prayer times",
-      color: "amber",
-      gradient: "from-amber-500 to-orange-600",
-      delay: "200ms",
-    },
-    {
-      title: "Daily Reminders",
-      href: "/reminders",
-      icon: "💫",
-      description: "Get inspired with daily spiritual reminders",
-      color: "purple",
-      gradient: "from-purple-500 to-violet-600",
-      delay: "300ms",
-    },
-  ];
 
   const features = [
     {
@@ -320,7 +267,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-gray-900 dark:to-emerald-950">
-      {/* --- NEW HORIZONTAL PRAYER TIME BAR --- */}
+      {/* --- PRAYER TIME BAR --- */}
       <AnimatePresence>
         {isPrayerBarVisible && (
           <motion.section
@@ -375,12 +322,11 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
+      {/* --- HERO SECTION --- */}
       <section
         ref={heroRef}
         className="relative min-h-screen flex flex-col justify-between overflow-hidden sm:py-32 py-20"
       >
-        {/* Background Slideshow */}
         <AnimatePresence>
           <motion.div
             key={currentImageIndex}
@@ -395,8 +341,8 @@ export default function Home() {
               alt="Background"
               layout="fill"
               objectFit="cover"
-              className="brightness-50" // Darken image for readability
-              priority // Prioritize loading the hero image
+              className="brightness-50"
+              priority
             />
             <div className="absolute inset-0 bg-black/10" />
           </motion.div>
@@ -411,14 +357,10 @@ export default function Home() {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {/* Main Heading */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-10 text-white drop-shadow-lg">
-                {/* 3. Apply the font here */}
                 <span className={`block ${arefRuqaa.className}`}>IUT SIKS</span>
-                <span className="block text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-200 mt-2"></span>
               </h1>
 
-              {/* Subtitle */}
               <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
                 Fostering spiritual growth and academic excellence at{" "}
                 <span className="font-medium text-emerald-300">
@@ -426,13 +368,8 @@ export default function Home() {
                 </span>
               </p>
 
-              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-                {/* <SignInButton> */}
-                <Link
-                  href="https://web.facebook.com/iutsiks"
-                  className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-                >
+                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
                   <span>Join Our Community</span>
                   <svg
                     className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -445,8 +382,7 @@ export default function Home() {
                       clipRule="evenodd"
                     />
                   </svg>
-                </Link>
-                {/* </SignInButton> */}
+                </button>
                 <Link
                   href="/events"
                   className="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold text-lg border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg"
@@ -462,9 +398,9 @@ export default function Home() {
               </div>
               <div style={{ height: "80px" }} />
               <button
-                aria-label="Scroll to next section"
+                aria-label="Scroll to gallery"
                 onClick={() =>
-                  navCardsRef.current?.scrollIntoView({ behavior: "smooth" })
+                  galleryRef.current?.scrollIntoView({ behavior: "smooth" })
                 }
                 className="flex justify-center animate-bounce focus:outline-none mx-auto"
                 style={{
@@ -482,7 +418,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- NEW PRAYER TIME SECTION --- */}
+      {/* --- PRAYER TIME GRID SECTION --- */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/50 dark:bg-emerald-950/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -560,87 +496,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Navigation Cards Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" ref={navCardsRef}>
+      {/* --- NEW GALLERY SECTION (Replaces Navigation Cards) --- */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8" ref={galleryRef}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4 font-poppins">
-              Explore Our Platform
+              Moments of Community
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full" />
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
+              A glimpse into life, events, and spirituality at IUT SIKS
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mt-4" />
           </div>
 
-          <div
-            ref={cardsRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
-          >
-            {navigationCards.map((card, index) => (
-              <Link
-                key={card.title}
-                href={card.href}
-                className={`card-item scroll-reveal group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-lg hover:shadow-2xl transition-all duration-500 card-hover-effect`}
-                style={{
-                  animationDelay: card.delay,
-                  transform: parallax[index]
-                    ? `rotateY(${parallax[index].x}deg) rotateX(${-parallax[
-                        index
-                      ].y}deg) scale(1.03)`
-                    : undefined,
-                  willChange: "transform",
-                }}
-                onMouseMove={(e) => handleParallax(e, index)}
-                onMouseLeave={() => resetParallax(index)}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[300px]">
+            {galleryImages.map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className={`relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 ${
+                  item.size === "large" ? "md:col-span-2" : "col-span-1"
+                }`}
               >
-                <div
-                  className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-50 transition-opacity duration-500"
-                  style={{
-                    background: `linear-gradient(135deg, ${card.gradient})`,
-                  }}
+                <Image
+                  src={item.src}
+                  alt={item.title} // FIXED: using item.title instead of item.alt
+                  layout="fill"
+                  objectFit="cover"
+                  className="group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="relative p-10">
-                  <div className="flex items-start space-x-6">
-                    <div
-                      className={`flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-r ${card.gradient} flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      {card.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-3 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-                        {card.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-                        {card.description}
-                      </p>
-                      <div className="flex items-center text-emerald-600 dark:text-emerald-400 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
-                        <span>Learn More</span>
-                        <svg
-                          className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider text-emerald-300 bg-emerald-900/40 rounded-full mb-2 backdrop-blur-sm">
+                    {item.category}
+                  </span>
+                  <h3 className="text-2xl font-bold text-white">
+                    {item.title}
+                  </h3>
                 </div>
-                {/* Hover gradient overlay */}
-                <div
-                  className={`absolute inset-0 opacity-0 group-hover:opacity-50 transition-opacity duration-500 bg-gradient-to-r ${card.gradient}`}
-                />
-              </Link>
+              </motion.div>
             ))}
           </div>
+
           <button
             aria-label="Scroll to next section"
             onClick={() =>
               featuresStatsRef.current?.scrollIntoView({ behavior: "smooth" })
             }
-            className="flex justify-center animate-bounce focus:outline-none mx-auto mt-12 mb-0"
+            className="flex justify-center animate-bounce focus:outline-none mx-auto mt-16 mb-0"
             style={{ background: "none", border: "none", cursor: "pointer" }}
           >
             <svg
@@ -660,7 +566,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Move the stats and features grid into a new section below, with ref */}
+      {/* --- STATS & FEATURES SECTION --- */}
       <section ref={featuresStatsRef} className="py-20 px-4 sm:px-6 lg:px-8">
         {/* Stats Section */}
         <div className="py-10 bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-900 dark:to-emerald-800 rounded-3xl mb-16">
@@ -713,20 +619,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* --- FOOTER --- */}
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center overflow-hidden">
                   <Image
                     src="/iut-siks-logo.jpg"
                     alt="IUT SIKS Logo"
                     width={500}
                     height={300}
-                    className="custom-class"
+                    className="object-cover w-full h-full"
                   />
                 </div>
                 <div>
@@ -761,20 +667,34 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Quick Links (Manually added since navigationCards was removed) */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                {navigationCards.map((link) => (
-                  <li key={link.title}>
-                    <Link
-                      href={link.href}
-                      className="text-gray-400 hover:text-emerald-400 transition-colors"
-                    >
-                      {link.title}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link
+                    href="/events"
+                    className="text-gray-400 hover:text-emerald-400 transition-colors"
+                  >
+                    Events
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/prayer-times"
+                    className="text-gray-400 hover:text-emerald-400 transition-colors"
+                  >
+                    Prayer Times
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/reminders"
+                    className="text-gray-400 hover:text-emerald-400 transition-colors"
+                  >
+                    Daily Reminders
+                  </Link>
+                </li>
               </ul>
             </div>
 

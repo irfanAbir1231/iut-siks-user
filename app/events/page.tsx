@@ -456,7 +456,7 @@ export default function EventsPage() {
           drives. There is a place for everyone at IUT SIKS.
         </p>
         <Link
-          href="/profile"
+          href="https://web.facebook.com/iutsiks"
           className="inline-flex items-center px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-lg shadow-lg hover:bg-emerald-700 hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-1"
         >
           Join Our Community
